@@ -1,15 +1,29 @@
 # 팀 작업 가이드 (내부용)
 
-## 0. 시작하기
+## 0. 시작하기 (각자 컴퓨터에서, 처음 한 번)
 ```bash
+git clone https://github.com/chlwjddnjs/ML_Term_project_Team8.git
+cd ML_Term_project_Team8
 pip install -r requirements.txt
 python run.py --data sample     # 지금 바로 끝까지 돌아감 (Popularity만 결과, 나머지는 TODO로 표시)
 ```
+- 데이터 파일 3개는 git에 올라가지 않으니 각자 받아서 `data/raw/`에 넣기 (`data/raw/README.md` 참고).
+- 모든 명령어는 `run.py`가 있는 폴더에서 실행.
 - 자기 담당 TODO를 채우면 `run.py`를 다시 돌렸을 때 그 모델 줄이 `[TODO]`에서 `[ok]`로 바뀝니다.
 - 코드에서 `TODO(1)`~`TODO(4)`로 검색하면 각자 할 일이 나옵니다.
 - 처음엔 `--data sample`(와인 100개)로 개발하고, 동작하면 `data/raw/`에 Slim을 넣고 `python run.py`.
 
-## 1. 규칙 (충돌 방지)
+## 1. 작업할 때마다 (git)
+```bash
+git pull                          # 시작 전에 최신 코드 받기
+# ... 자기 파일 수정 ...
+python run.py --data sample       # 돌아가는지 확인
+git add recsys/models/mf.py       # 자기 파일만 add (git add . 보다 안전)
+git commit -m "MF 학습 구현"
+git push                          # 거절되면 git pull 후 다시 push
+```
+
+## 2. 규칙 (충돌 방지)
 1. **자기 담당 파일만 수정.** 공통 파일(`base.py`, `run.py`, `config.yaml`, `split.py`, `evaluator.py`)은 팀장만 수정하고, 바꿀 일이 생기면 먼저 공유.
 2. **공통 스키마 컬럼 이름은 바꾸지 않기.** (`adapter.py` 맨 위에 정의)
    - ITEMS: `item_id, name, winery, country, region, type, grapes(list), harmonize(list), abv, body, acidity`
@@ -20,7 +34,7 @@ python run.py --data sample     # 지금 바로 끝까지 돌아감 (Popularity�
 6. 인터넷 코드를 참고했으면 바로 `docs/CITATIONS.md`에 출처 추가 (안 하면 표절 처리).
 7. 수업에서 안 배운 함수/클래스를 쓰면 바로 `docs/LIBRARIES.md` 자기 칸에 파라미터와 함께 설명 추가 (스펙 필수 항목).
 
-## 2. 역할별 할 일
+## 3. 역할별 할 일
 
 ### ① 김도원 — 데이터 · DatasetAdapter (`data/adapter.py`, `data/cleaner.py`)
 - [ ] EDA: `cleaner.quality_report` 결과 + 분포 그래프 (PPT "Data exploration")
@@ -49,7 +63,7 @@ python run.py --data sample     # 지금 바로 끝까지 돌아감 (Popularity�
 - [ ] `analysis.worst_predictions` (실패 사례 분석 → PPT)
 - [ ] 최종 비교표·그래프 정리 (`outputs/` 결과 사용)
 
-## 3. 진행 순서
+## 4. 진행 순서
 ```
 ① fuzzy 매칭·척도 변환 ─────────────→ 교차 데이터셋 검증
 ② MF ───────┐
@@ -58,7 +72,7 @@ python run.py --data sample     # 지금 바로 끝까지 돌아감 (Popularity�
 ④ KNN·분석 함수는 처음부터 병렬로 진행
 ```
 
-## 4. 최종 제출물 체크리스트 (스펙 기준, 11/9 마감)
+## 5. 최종 제출물 체크리스트 (스펙 기준, 11/9 마감)
 **PPT**
 - [ ] Business objective / Data exploration / Preprocessing / Modeling / Evaluation & analysis (성공·실패 모두 설명)
 - [ ] Learning experience: 어려웠던 점과 해결, 다시 한다면, 개인별로 배운 점

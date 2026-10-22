@@ -1,7 +1,7 @@
 """Plots saved to outputs/ for the PPT.  Owner: shared (anyone may add a function)."""
 import matplotlib
 
-matplotlib.use("Agg")            # draw to files; works on servers and Colab
+matplotlib.use("Agg")            # draw straight to PNG files (no window needed)
 import matplotlib.pyplot as plt  # noqa: E402
 
 

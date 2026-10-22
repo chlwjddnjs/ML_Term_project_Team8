@@ -87,15 +87,7 @@ python run.py                      # full experiment
 python run.py --models mf hybrid   # only some models
 ```
 
-**Google Colab**
-
-```python
-from google.colab import drive
-drive.mount('/content/drive')
-%cd /content/drive/MyDrive/wine-recsys
-!pip install -q -r requirements.txt
-!python run.py --data sample
-```
+Run every command from the repository root (the folder that contains `run.py`).
 
 ## Outputs
 
