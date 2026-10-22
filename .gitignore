@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# datasets are downloaded separately (too large for GitHub)
+data/raw/*
+!data/raw/README.md
+
+# generated results
+outputs/*
+!outputs/.gitkeep

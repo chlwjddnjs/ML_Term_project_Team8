@@ -1,0 +1,95 @@
+# =============================================================================
+# Wine RecSys - global configuration
+# Every hyper-parameter and file path lives here, so experiments can be changed
+# without touching the code. Owner: shared (change only after telling the team).
+# =============================================================================
+
+seed: 42
+
+# Which data profile to use (override with:  python run.py --data sample)
+data: slim
+
+data_profiles:
+  # Real experiment: X-Wines Slim (150K ratings), downloaded from Google Drive.
+  slim:
+    xwines_wines: data/raw/XWines_Slim_1K_wines.csv
+    xwines_ratings: data/raw/XWines_Slim_150K_ratings.csv
+    min_user_ratings: 5        # users with fewer ratings stay entirely in train
+  # Tiny X-Wines Test version (shipped in the repo) for quick smoke tests.
+  sample:
+    xwines_wines: data/sample/XWines_Test_100_wines.csv
+    xwines_ratings: data/sample/XWines_Test_1K_ratings.csv
+    min_user_ratings: 2
+
+# Second dataset (model testing): Wine Enthusiast reviews from Kaggle.
+# If the file is missing, the cross-dataset step is skipped with a warning.
+winemag_path: data/raw/winemag-data-130k-v2.csv
+
+output_dir: outputs
+
+split:
+  test_ratio: 0.2              # fraction of each user's ratings held out for test
+
+evaluation:
+  k: 10                        # top-K for Precision/Recall/NDCG
+  relevant_threshold: 4.0      # a held-out rating >= this counts as "relevant"
+  max_eval_users: 2000         # sample users for ranking evaluation (speed)
+
+# Models to run, in order. Comment one out to skip it.
+models:
+  - popularity
+  - item_knn
+  - mf
+  - content
+  - hybrid
+
+model_params:
+  popularity: {}
+  item_knn:
+    n_neighbors: 20
+  mf:
+    n_factors: 20
+    learning_rate: 0.01
+    reg: 0.05
+    n_epochs: 20
+  content:
+    use_text: false            # Wine Enthusiast descriptions are not in X-Wines
+  hybrid:
+    alpha: 0.5                 # weight of the CF score
+    cold_start_threshold: 5    # users with fewer train ratings lean on content
+
+# -----------------------------------------------------------------------------
+# DatasetAdapter column maps:  common_name: raw_column_name
+# Adding a new dataset = adding a new block here (no code change needed).
+# -----------------------------------------------------------------------------
+adapter:
+  xwines_items:
+    item_id: WineID
+    name: WineName
+    winery: WineryName
+    country: Country
+    region: RegionName
+    type: Type
+    grapes: Grapes             # list stored as string, parsed automatically
+    harmonize: Harmonize       # food pairing list
+    abv: ABV
+    body: Body
+    acidity: Acidity
+  xwines_ratings:
+    user_id: UserID
+    item_id: WineID
+    rating: Rating
+    date: Date
+  winemag_items:
+    title: title               # "Winery 2013 Name (Region)" - parse in adapter
+    winery: winery
+    country: country
+    province: province
+    region: region_1
+    variety: variety
+    price: price
+    points: points
+    description: description
+    taster: taster_name
+
+list_columns: [grapes, harmonize]
