@@ -42,11 +42,33 @@ def expert_score_per_item(matches, expert):
     return joined.groupby("item_id")["rating"].mean()
 
 
-def model_quality_per_item(model, train, item_ids):
-    """TODO(4): one quality score per wine from a fitted model.
+def model_quality_per_item(model, train, item_ids, n_users=500, seed=42):
+    """One "how good is this wine" score per wine from a fitted model.
 
-    Ideas: mean of model.score(u, item_ids) over a sample of train users,
-    or MF's item bias (model.b_i). Return a Series indexed by item_id.
-    Baseline to compare against: train.groupby("item_id")["rating"].mean()
+    The expert data has no users, so a user-specific prediction cannot be
+    compared with it directly. We turn the model into a single score per wine:
+      - MF (has an item bias b_i): mu + b_i, the wine's quality after removing
+        user effects - exactly the model's notion of "generally good wine".
+      - any other model: mean of model.score(u, items) over a random sample of
+        `n_users` train users ("how much the average user would like it").
+    Only the ORDER matters afterwards (Spearman, top-k overlap), so the scale
+    of the score does not need to match the 1-5 rating scale.
+
+    Returns:
+        pandas Series indexed by item_id.
     """
-    raise NotImplementedError("model_quality_per_item - TODO(4)")
+    item_ids = np.asarray(item_ids)
+
+    b_i = getattr(model, "b_i", None)
+    if b_i is not None and hasattr(model, "item_index"):
+        idx = [model.item_index[i] for i in item_ids]
+        values = model.global_mean + np.asarray(b_i)[idx]
+        return pd.Series(values, index=item_ids, name=model.name)
+
+    users = train["user_id"].unique()
+    if len(users) > n_users:
+        users = np.random.default_rng(seed).choice(users, size=n_users, replace=False)
+    total = np.zeros(len(item_ids))
+    for u in users:
+        total += np.asarray(model.score(u, item_ids), dtype=float)
+    return pd.Series(total / len(users), index=item_ids, name=model.name)

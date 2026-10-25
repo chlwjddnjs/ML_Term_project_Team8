@@ -44,4 +44,15 @@ Delete rows that were actually covered in class.
 
 | Module | Function / class | Parameters used | Purpose |
 |---|---|---|---|
-| | | | |
+| `numpy` | `np.bincount(x, weights, minlength)` | `x`: user row numbers, `weights`: ratings, `minlength`: number of users | Sum and count of ratings per user in one pass → per-user mean rating (ItemKNN). |
+| `numpy` | `np.divide(a, b, out, where)` | `where=b > 0`: divide only where the denominator is non-zero; `out`: default value elsewhere | Safe division: users/items with no ratings get a fallback value instead of NaN. |
+| `numpy` | `np.fill_diagonal(a, val)` | `val=0.0` | Sets sim(i, i) = 0 so a wine is never its own neighbor. |
+| `numpy` | `np.searchsorted(a, v)` | `a`: sorted user row numbers, `v`: `0..n_users` | Finds where each user's block starts in the sorted rating list (fast per-user grouping). |
+| `numpy` | `np.ix_(rows, cols)` | target item rows, rated item columns | Selects the sub-matrix sim[targets, rated items] in one indexing step. |
+| `numpy` | `np.argpartition(a, kth, axis)` | `kth=k-1`, `axis=1` | Finds the k most similar neighbors per row without fully sorting (faster than `argsort`). |
+| `numpy` | `np.put_along_axis(arr, indices, values, axis)` | `values=True`, `axis=1` | Marks the k selected neighbors in a boolean mask. |
+| `pandas` | `Series.map(arg)` | `arg`: dict id → row number / count | Converts user/item ids to matrix positions; attaches train counts to test ratings. |
+| `pandas` | `Series.value_counts()` | – | Number of train ratings per wine (`item_n_train` in error analysis). |
+| `pandas` | `DataFrame.nlargest(n, columns)` | `columns="abs_error"` | Picks the n worst predictions for the failure analysis. |
+| `pandas` | `DataFrame.agg(**named)` | `MAE=("abs_error", "mean")`, … | Several summary statistics per user/item group in `error_by_group`. |
+| built-in | `getattr(obj, name, default)` | `name="b_i"`, `default=None` | Uses MF's item bias for the cross-dataset score when the model has one. |
