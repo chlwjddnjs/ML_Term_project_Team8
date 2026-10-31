@@ -38,7 +38,15 @@ Delete rows that were actually covered in class.
 
 | Module | Function / class | Parameters used | Purpose |
 |---|---|---|---|
-| | | | |
+| `sklearn.feature_extraction` | `DictVectorizer(dtype)`; `fit`, `transform`, `get_feature_names_out` | `dtype=np.float64` | Learns categorical/multi-label vocabularies on the catalogue; transforms new wines into the same sparse feature space, ignoring unseen labels. |
+| `sklearn.preprocessing` | `normalize(X)` | default L2 row norm | Balances each attribute block and normalizes wine vectors for cosine similarity. |
+| `scipy.sparse` | `csr_matrix`, `hstack(blocks, format)` | `format="csr"` | Stores and combines feature blocks without a large dense matrix. |
+| `sklearn.feature_extraction.text` | `TfidfVectorizer(max_features, sublinear_tf)` | `max_features=5000`, `sublinear_tf=True` | Optional description features; skipped when descriptions are unavailable. |
+| `pandas` | `to_numeric(arg, errors)` | `errors="coerce"` | Converts ABV to numbers; invalid/missing ABV contributes zero. |
+| `numpy` | `linalg.norm`, `allclose` | `allclose(weights, 0)` | Normalizes user profiles; detects equal ratings and uses equal weights instead. |
+
+Implementation notes: Each categorical/list block is L2-normalized, then concatenated with ABV / 25 and the complete wine vector is normalized again. Profiles use signed `(rating - user mean)` weights from training ratings only. With a single/equal rating history, rated wine vectors have equal weights. Unknown users/items return zero similarity. `model.feature_encoder` retains fitted vocabularies for later datasets. Content scores are similarities, so evaluate ranking metrics rather than RMSE/MAE.
+
 
 ## Member 4 (신우엽) – evaluation & analysis
 
