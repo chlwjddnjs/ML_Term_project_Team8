@@ -52,9 +52,9 @@ git push                          # 거절되면 git pull 후 다시 push
 - 참고: 순수 파이썬 SGD는 Slim에서 epoch당 몇 초 걸림. 느리면 epoch 수를 줄여 먼저 확인.
 
 ### ③ 최정원 — 콘텐츠 기반 · 하이브리드 (`models/content.py`, `models/hybrid.py`)
-- [ ] `build_item_features`: one-hot / multi-hot / ABV 스케일링 (+ 블록 가중치)
-- [ ] `ContentBasedRecommender._fit / score / similar_items`
-- [ ] `HybridRecommender.user_weight`: 평점 적은 사용자일수록 콘텐츠 비중↑
+- [x] `build_item_features`: one-hot / multi-hot / ABV 스케일링 (+ 블록별 정규화로 균형 조정; 별도 가중치 튜닝은 미진행)
+- [x] `ContentBasedRecommender._fit / score / similar_items`
+- [x] `HybridRecommender.user_weight`: 평점 적은 사용자일수록 콘텐츠 비중↑ (가중치 검증 완료; MF 연동 평가는 MF 구현 후 진행)
 - [ ] (선택) 와인 임베딩 K-means + PCA/t-SNE 시각화
 
 ### ④ 신우엽 — 평가 · 분석 (`models/baseline.py`, `eval/*`)
