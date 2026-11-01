@@ -32,7 +32,35 @@ Delete rows that were actually covered in class.
 
 | Module | Function / class | Parameters used | Purpose |
 |---|---|---|---|
-| | | | |
+| `numpy` | `Generator.normal(loc, scale, size)` | `loc=0`, `scale=0.1`, `size=(n_users, n_factors)` | Small random initial values for the user / item factor matrices P and Q. |
+| `numpy` | `Generator.permutation(x)` | `x`: number of train ratings | New random order of the train ratings every epoch (the "stochastic" in SGD). |
+| `numpy` | `ndarray.copy()` | – | Keeps p_u from before its update, so q_i is updated with the old value (simultaneous update). |
+| `numpy` | `@` operator (`np.matmul`) | two vectors / matrix and vector | Dot product p_u · q_i; `Q[idx] @ P[u]` scores many wines for one user at once. |
+| `numpy` | `np.full(shape, fill_value)` | `fill_value`: global mean | Starts every prediction at μ before adding the biases and the factor term. |
+| `numpy` | `np.clip(a, a_min, a_max)` | `a_min=1`, `a_max=5` | Keeps logged predictions on the 1–5 rating scale (same as the evaluator). |
+| `pandas` | `Series.fillna(value)`, `Series.astype(dtype)` | `value=-1`, `dtype=int` | Ids not seen in train become row number -1 (handled as unknown user / wine). |
+| built-in | `dict.get(key, default)` | `default=-1` | Row number of a wine, or -1 if the wine is not in the catalogue. |
+| `numpy` | `np.bincount(x, minlength)` | `x`: wine row of every train rating, `minlength`: number of wines | Number of train ratings per wine (`n_i`) for `bias_damping` in `mf.py`. |
+| `numpy` | `np.divide(a, b, out, where)` | `a`: bias_damping, `b`: `n_i`, `where=n_i > 0` | `bias_damping / n_i` without dividing by zero for wines with no ratings (`mf.py`). |
+| `collections` | `Counter.update(iterable)` | each user's top-k list | Counts how often each wine is recommended (`experiments/check_mf_top.py`). |
+| `numpy` | `np.repeat(a, repeats)` | `repeats`: times each wine was recommended | Median train-rating count weighted by how often a wine is recommended (`check_mf_top.py`). |
+| `pandas` | `Series.reindex(index, fill_value)` | `fill_value=0` | Per-wine rating counts that also list wines with no ratings (`check_mf_top.py`). |
+| `time` | `time.perf_counter()` | – | Training time of each tuning candidate (`fit_seconds` in `experiments/tune_mf.py`). |
+| `pandas` | `Series.idxmin()` | – | Epoch with the lowest validation RMSE, used as `n_epochs` (`tune_mf.py`). |
+| `yaml` (PyYAML) | `yaml.safe_dump(data, sort_keys, allow_unicode)` | `sort_keys=False`: keep the order of config.yaml, `allow_unicode=True` | Writes `experiments/config_mf_<tag>.yaml`, a copy of config.yaml with the tuned MF setting (`tune_mf.py`). |
+| `pathlib` | `Path.write_text(data, encoding)` | `encoding="utf-8"` | Saves that config file (`tune_mf.py`). |
+| `sys` | `sys.path.insert(index, path)` | `index=0`, `path`: project root | Lets the scripts in `experiments/` import the `recsys` package (`tune_mf.py`, `check_mf_top.py`). |
+| `pathlib` | `Path.resolve()`, `Path.parent`, `Path.relative_to(other)` | `other`: project root | Finds the project root from the script's own path; prints the config path relative to it (`tune_mf.py`). |
+| `pandas` | `pd.set_option(name, value)` | `"display.width"`: 200, `"display.max_columns"`: None | Prints the wide result tables without cutting columns (both scripts). |
+| `numpy` | `np.median(a)` | `a`: rating counts | Median train-rating count of the top-10 b_i wines / of the recommended wines (both scripts). |
+| `pandas` | `DataFrame.to_csv(path, index, encoding)` | `index=False`, `encoding="utf-8-sig"` | Saves result tables; the BOM lets Excel show accented wine names correctly (both scripts). |
+| `sys` | `sys.stdout.reconfigure(errors)` | `errors="replace"` | Wine names with accents never crash a console that cannot show them (`check_mf_top.py`). |
+| `pandas` | `Series.str.slice(start, stop)` | `0, 32` | Shortens long wine names in the printed tables (`check_mf_top.py`). |
+| `pandas` | `DataFrame.assign(**columns)` | `rec_count=`: times each wine was recommended | Adds a column to the per-wine table without changing the original (`check_mf_top.py`). |
+| built-in | `dict.setdefault(key, default)` | `reg_bias` → `reg`, `bias_damping` → 0 | Fills MF options that config.yaml does not set (`tune_mf.py`). |
+| built-in | `max(iterable, key)`, `min(iterable, key)` | `key`: function of a result row, e.g. `(P@10, -RMSE)` | Picks the best candidate by a rule (`tune_mf.py`). |
+| built-in | `print(..., flush=True)` | `flush=True` | Shows each candidate's line right away during the 10-minute search (`tune_mf.py`). |
+| `sys` | `sys.exit(message)` | error message | Stops with a message if the valid set is empty (`tune_mf.py`). |
 
 ## Member 3 (최정원) – content-based & hybrid
 

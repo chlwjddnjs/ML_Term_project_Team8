@@ -52,6 +52,7 @@ model_params:
     learning_rate: 0.01
     reg: 0.05
     n_epochs: 20
+    bias_damping: 10           # count-aware L2 on b_i (remedy 2, see experiments/tune_mf.py)
   content:
     use_text: false            # Wine Enthusiast descriptions are not in X-Wines
   hybrid:
