@@ -1,7 +1,7 @@
 """Baselines for comparison.  Owner: member 4.
 
 PopularityRecommender is implemented (it is the reference every model must beat).
-ItemKNNRecommender (memory-based collaborative filtering) is TODO(4).
+ItemKNNRecommender: memory-based collaborative filtering (item-item similarity).
 """
 import numpy as np
 

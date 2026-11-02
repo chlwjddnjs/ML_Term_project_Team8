@@ -58,9 +58,9 @@ git push                          # 거절되면 git pull 후 다시 push
 - [ ] (선택) 와인 임베딩 K-means + PCA/t-SNE 시각화
 
 ### ④ 신우엽 — 평가 · 분석 (`models/baseline.py`, `eval/*`)
-- [ ] `ItemKNNRecommender` (메모리 기반 CF 베이스라인)
-- [ ] `cross_dataset.model_quality_per_item` (교차 데이터셋 비교용 와인별 점수)
-- [ ] `analysis.worst_predictions` (실패 사례 분석 → PPT)
+- [x] `ItemKNNRecommender` (메모리 기반 CF 베이스라인)
+- [x] `cross_dataset.model_quality_per_item` (교차 데이터셋 비교용 와인별 점수)
+- [x] `analysis.worst_predictions` (실패 사례 분석 → PPT)
 - [ ] 최종 비교표·그래프 정리 (`outputs/` 결과 사용)
 
 ## 4. 진행 순서
