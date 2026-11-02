@@ -23,6 +23,9 @@ Add an entry **whenever** you adapt code from a blog, Kaggle, GitHub, etc.
 
 | File / function | Source (URL) | What was reused / changed |
 |---|---|---|
-| | | |
+| `adapter.normalize_text` | Python docs, unicodedata: https://docs.python.org/3/library/unicodedata.html | Standard NFKD + ASCII pattern for removing accents; stopword list written for wine names. |
+| `adapter.match_items(method="fuzzy")` | Python docs, difflib: https://docs.python.org/3/library/difflib.html | `SequenceMatcher.ratio()` and `get_close_matches()` used as documented; winery-then-name blocking written by us. |
+| `adapter.scale_points(method="quantile")` | Quantile mapping / histogram matching (pandas `rank(pct=True)` + `quantile`) | Hint given in the base code; implemented on top of pandas. |
+| `cleaner.iqr_bounds`, `clean_expert` | IQR outlier rule (Tukey, 1977) | Applied on log(price) because prices are skewed. |
 
 <!-- If AI tools were used to write code, state it here according to the course policy. -->

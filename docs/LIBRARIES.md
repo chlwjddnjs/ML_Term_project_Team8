@@ -26,7 +26,20 @@ Delete rows that were actually covered in class.
 
 | Module | Function / class | Parameters used | Purpose |
 |---|---|---|---|
-| | | | |
+| `re` | `re.sub(pattern, repl, string)` | `r"[^a-z0-9]+"` → `" "`; trailing `"(...)"` → `""`; `r"\b(?:19\|20)\d{2}\b\|\bNV\b"` → `" "` | Replaces punctuation with spaces (`normalize_text`); removes the region in brackets and the vintage year from Wine Enthusiast titles (`parse_winemag_title`). |
+| `unicodedata` | `unicodedata.normalize(form, s)` | `form="NFKD"` | Splits an accented letter into the letter + a separate accent mark ("è" → "e" + "̀") so the accent can be dropped (`normalize_text`). |
+| built-in | `str.encode(encoding, errors)`, `bytes.decode(encoding)` | `"ascii"`, `errors="ignore"` | Drops the accent marks (and non-Latin letters) left by NFKD: "Fèvre" → "Fevre" (`normalize_text`). |
+| `difflib` | `SequenceMatcher(isjunk, a, b).ratio()` | `isjunk=None`, `a`, `b`: normalized names | Similarity 0–1 = 2 × matching characters / total length; e.g. "djf vinhos" vs "dfj vinhos" = 0.9 (`_similarity`). |
+| `difflib` | `get_close_matches(word, possibilities, n, cutoff)` | `n=3`, `cutoff=threshold` (0.85) | Finds up to 3 expert wineries whose name is similar to an X-Wines winery, most similar first (`match_items(method="fuzzy")`). |
+| `pandas` | `Series.rank(pct)` | `pct=True` | Percentile rank (0–1) of each expert score; equal scores get the same average rank (`scale_points(method="quantile")`). |
+| `pandas` | `Series.quantile(q)` | `q`: array of percentiles | X-Wines rating at each percentile, i.e. the user rating with the same rank as the expert score (`scale_points`). |
+| `pandas` | `DataFrame.drop_duplicates(subset, keep)` | `subset=["user_id", "item_id"]`, `keep="last"` | Keeps only the latest rating when a user rated the same wine twice (`clean_ratings`). |
+| `pandas` | `Series.clip(lower, upper)` | IQR limits on log(price): $4 / $163 | Caps price outliers instead of deleting the review (`clean_expert`). |
+| `pandas` | `pd.to_numeric(arg, errors)` | `errors="coerce"` | Turns broken ABV values into NaN so they are treated as outliers (`clean_items`). |
+| `pandas` | `Series.astype("string").str.strip()` | – | Removes stray spaces from body / acidity labels (`clean_items`). |
+| `pandas` | `DataFrame.merge(right, on, how, indicator)` | `how="left"`, `indicator=True` | Finds the pairs found only by fuzzy matching (`_merge == "left_only"`) (`experiments/data_analysis.py`). |
+| `numpy` | `np.log`, `np.exp` | – | IQR rule on the log scale for the skewed price, then back to dollars (`clean_expert`, `data_analysis.py`). |
+| `matplotlib` | `Axes.set_yscale("log")`, `Axes.axhline` / `axvline(y/x, ls)` | `ls="--"` | Log axis for the long tail of ratings per wine; dashed lines for the ABV limit and the price IQR limits (`data_analysis.py`). |
 
 ## Member 2 (김한결) – Matrix Factorization
 
