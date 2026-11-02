@@ -17,8 +17,7 @@ Already implemented (shared plumbing):
     apply_column_map, xwines_to_common, winemag_to_common (renaming only),
     scale_points(method="linear"), match_items(method="exact")
 Implemented by member 1:
-    normalize_text, parse_winemag_title, match_items(method="fuzzy")
-TODO for member 1 (marked "TODO(1)"):
+    normalize_text, parse_winemag_title, match_items(method="fuzzy"),
     scale_points(method="quantile")
 """
 import ast
@@ -123,8 +122,13 @@ def parse_winemag_title(title, winery):
     return " ".join(name.split())
 
 
-def winemag_to_common(raw, cfg, scale_method="linear"):
-    """Convert the raw Wine Enthusiast table into the common EXPERT schema."""
+def winemag_to_common(raw, cfg, scale_method="linear", reference=None):
+    """Convert the raw Wine Enthusiast table into the common EXPERT schema.
+
+    Args:
+        scale_method: "linear" or "quantile" (see scale_points).
+        reference: X-Wines ratings Series, only needed for "quantile".
+    """
     df = apply_column_map(raw, cfg["adapter"]["winemag_items"])
     expert = pd.DataFrame({
         "expert_id": np.arange(len(df)),
@@ -140,7 +144,8 @@ def winemag_to_common(raw, cfg, scale_method="linear"):
         "description": df["description"],
         "taster": df["taster"],
     })
-    expert["rating"] = scale_points(expert["points"], method=scale_method)
+    expert["rating"] = scale_points(expert["points"], method=scale_method,
+                                    reference=reference)
     return expert[EXPERT_COLUMNS].reset_index(drop=True)
 
 
@@ -151,18 +156,34 @@ def scale_points(points, method="linear", reference=None):
         points: Series of Wine Enthusiast points.
         method: "linear"   - min-max map 80..100 -> 1..5 (simple baseline,
                              used as the "before" side of the ablation study)
-                "quantile" - TODO(1): map each point to the X-Wines rating
-                             with the same percentile (handles the truncated
-                             and skewed distribution)
+                "quantile" - map each point to the X-Wines rating with the
+                             same percentile (handles the truncated and
+                             skewed distribution)
         reference: X-Wines ratings Series, needed for "quantile".
+
+    Why "quantile"?  Experts only review wines scoring 80 or more, so "linear"
+    turns a good wine (88 points) into 2.6 / 5, far below the X-Wines average
+    (3.8). "quantile" keeps the ORDER of the points but gives them the same
+    distribution as the X-Wines ratings:
+        88 points is better than ~50% of expert reviews
+        -> the X-Wines rating that is better than ~50% of user ratings = 4.0
     """
     points = points.astype(float)
     if method == "linear":
         return 1 + (points - 80) / (100 - 80) * 4
     if method == "quantile":
-        # TODO(1): hint - percentile rank of each point (points.rank(pct=True)),
-        # then reference.quantile(pct). Round to the nearest 0.5 if you like.
-        raise NotImplementedError("scale_points(method='quantile') - TODO(1)")
+        if reference is None:
+            raise ValueError("scale_points(method='quantile') needs reference= "
+                             "(the X-Wines ratings)")
+        # 1. percentile rank of each point, between 0 and 1
+        #    (equal points get the same, averaged rank)
+        pct = points.rank(pct=True)
+        # 2. look up the X-Wines rating at that percentile.
+        #    Missing points stay NaN (quantile() cannot take NaN).
+        out = pd.Series(np.nan, index=points.index)
+        valid = pct.notna()
+        out[valid] = reference.astype(float).quantile(pct[valid].to_numpy()).to_numpy()
+        return out
     raise ValueError(f"unknown method: {method}")
 
 
