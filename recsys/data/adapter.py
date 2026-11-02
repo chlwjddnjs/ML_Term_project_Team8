@@ -16,11 +16,15 @@ added by writing a new column map instead of changing code.
 Already implemented (shared plumbing):
     apply_column_map, xwines_to_common, winemag_to_common (renaming only),
     scale_points(method="linear"), match_items(method="exact")
+Implemented by member 1:
+    normalize_text, parse_winemag_title, match_items(method="fuzzy")
 TODO for member 1 (marked "TODO(1)"):
-    parse_winemag_title, normalize_text, scale_points(method="quantile"),
-    match_items(method="fuzzy")
+    scale_points(method="quantile")
 """
 import ast
+import difflib
+import re
+import unicodedata
 
 import numpy as np
 import pandas as pd
@@ -96,15 +100,27 @@ def parse_winemag_title(title, winery):
     Example: title "Rainstorm 2013 Pinot Gris (Willamette Valley)", winery
     "Rainstorm"  ->  "Pinot Gris"   (winery, vintage year and region removed)
 
-    TODO(1): implement with regular expressions (re module). The current
-    version only strips the winery prefix, so matching will be weak.
+    Steps:
+        1. remove the winery name at the start of the title
+        2. remove the region in brackets at the end, also when the bracket
+           contains another bracket: "(Walla Walla Valley (WA))"
+        3. remove the vintage year (1900-2099) and "NV" (non-vintage)
+        4. collapse the spaces left behind
     """
     if not isinstance(title, str):
         return ""
     name = title
+    # 1. winery prefix: "Rainstorm 2013 Pinot Gris (...)" -> " 2013 Pinot Gris (...)"
     if isinstance(winery, str) and name.startswith(winery):
         name = name[len(winery):]
-    return name.strip()
+    # 2. trailing "(...)" at the end of the title ($ = end of string).
+    #    Inside the bracket: any non-bracket character, or one inner "(...)".
+    name = re.sub(r"\s*\((?:[^()]|\([^()]*\))*\)\s*$", "", name)
+    # 3. a 4-digit year starting with 19 or 20, or the word "NV".
+    #    \b = word boundary, so "2013" is removed but "12013" is not.
+    name = re.sub(r"\b(?:19|20)\d{2}\b|\bNV\b", " ", name)
+    # 4. "  Pinot   Gris " -> "Pinot Gris"
+    return " ".join(name.split())
 
 
 def winemag_to_common(raw, cfg, scale_method="linear"):
@@ -153,15 +169,48 @@ def scale_points(points, method="linear", reference=None):
 # ---------------------------------------------------------------------------
 # Linking the two datasets
 # ---------------------------------------------------------------------------
-def normalize_text(text):
-    """Normalize a name for matching (lower-case, trimmed).
+# Common words that one dataset attaches to a name and the other does not
+# (e.g. "Anne Amie Vineyards" vs "Anne Amie"). They are removed before matching.
+STOPWORDS = {"winery", "wines", "wine", "vineyards", "vineyard", "estate", "estates",
+             "cellars", "cellar", "bodegas", "bodega", "domaine", "domaines", "chateau",
+             "chateaux", "cantina", "cantine", "tenuta", "weingut", "quinta", "casa",
+             "the", "de", "du", "des", "di", "del", "la", "le", "les", "and"}
 
-    TODO(1): also remove accents (e.g. "Château" -> "chateau"), punctuation
-    and common words such as "winery", "estate", "bodegas", "domaine".
+
+def normalize_text(text):
+    """Normalize a name so that the two datasets can be compared.
+
+    Example: "Domaine Nathalie et Gilles Fèvre" -> "nathalie et gilles fevre"
+
+    Steps:
+        1. remove accents      "Fèvre" -> "Fevre"
+        2. lower-case          "Fevre" -> "fevre"
+        3. punctuation -> space "Grand'Arte" -> "grand arte"
+        4. drop STOPWORDS      "domaine nathalie ..." -> "nathalie ..."
+    Missing values (NaN) become an empty string.
     """
     if not isinstance(text, str):
         return ""
-    return " ".join(text.lower().split())
+    # 1. NFKD splits "è" into "e" + a separate accent mark;
+    #    encoding to ASCII with "ignore" then drops the accent mark
+    #    (non-Latin letters such as Cyrillic are dropped as well).
+    text = unicodedata.normalize("NFKD", text)
+    text = text.encode("ascii", "ignore").decode("ascii")
+    # 2. lower-case
+    text = text.lower()
+    # 3. every run of characters that is not a letter or digit -> one space
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    # 4. split into words, drop the common words, join back with single spaces
+    return " ".join(word for word in text.split() if word not in STOPWORDS)
+
+
+def _similarity(a, b):
+    """String similarity between 0 (nothing in common) and 1 (identical).
+
+    difflib.SequenceMatcher.ratio() = 2 * (matching characters) / (len(a) + len(b))
+    e.g. "djf vinhos" vs "dfj vinhos" -> 0.9
+    """
+    return difflib.SequenceMatcher(None, a, b).ratio()
 
 
 def match_items(items, expert, method="exact", threshold=0.85):
@@ -169,8 +218,9 @@ def match_items(items, expert, method="exact", threshold=0.85):
 
     Args:
         method: "exact" - identical normalized (winery, name)   [baseline]
-                "fuzzy" - TODO(1): string similarity, e.g. difflib.SequenceMatcher
-                          on winery first, then on name; keep pairs >= threshold
+                "fuzzy" - string similarity (difflib): winery first, then name;
+                          keep pairs whose winery AND name are >= threshold
+        threshold: minimum similarity (0-1) for the fuzzy method.
     Returns:
         DataFrame with columns item_id, expert_id, score (1.0 for exact).
         One X-Wines wine can match several reviews (different vintages).
@@ -184,5 +234,31 @@ def match_items(items, expert, method="exact", threshold=0.85):
         merged = merged[merged["_w"] != ""]
         return merged[["item_id", "expert_id"]].assign(score=1.0).reset_index(drop=True)
     if method == "fuzzy":
-        raise NotImplementedError("match_items(method='fuzzy') - TODO(1)")
+        # Rows without a winery name cannot be matched.
+        left = left[left["_w"] != ""]
+        right = right[right["_w"] != ""]
+
+        # Group the ~130K reviews by winery once, so that for each X-Wines wine
+        # we only compare names inside a few similar wineries instead of
+        # comparing against every review (much faster).
+        reviews_by_winery = {w: g for w, g in right.groupby("_w")}
+        expert_wineries = list(reviews_by_winery)
+
+        rows = []
+        for item_id, item_winery, item_name in zip(left["item_id"], left["_w"], left["_n"]):
+            # Step 1: up to 3 expert wineries whose name is similar enough
+            # (get_close_matches returns them sorted, most similar first).
+            close_wineries = difflib.get_close_matches(
+                item_winery, expert_wineries, n=3, cutoff=threshold)
+            for winery in close_wineries:
+                winery_score = _similarity(item_winery, winery)
+                # Step 2: inside that winery, compare the wine names.
+                reviews = reviews_by_winery[winery]
+                for expert_id, expert_name in zip(reviews["expert_id"], reviews["_n"]):
+                    name_score = _similarity(item_name, expert_name)
+                    if name_score >= threshold:
+                        # final score = average of the two similarities
+                        score = round((winery_score + name_score) / 2, 4)
+                        rows.append((item_id, expert_id, score))
+        return pd.DataFrame(rows, columns=["item_id", "expert_id", "score"])
     raise ValueError(f"unknown method: {method}")
