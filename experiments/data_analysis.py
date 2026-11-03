@@ -8,7 +8,10 @@ Answers two questions for the PPT ("Data exploration", "Preprocessing"):
   B. Ablation - does each part of the alignment module help?
      B1. matching : original code vs exact (normalize + title parsing)
                     vs fuzzy at several thresholds
-     B2. scaling  : linear vs quantile conversion of expert points,
+     B2. quality  : are the pairs that ONLY fuzzy finds really the same wine?
+                    Every such pair (down to threshold 0.80) was checked by
+                    hand; the labels are in experiments/fuzzy_match_labels.csv
+     B3. scaling  : linear vs quantile conversion of expert points,
                     compared with the X-Wines mean rating of the same wine
 
 Outputs (outputs/):
@@ -16,8 +19,10 @@ Outputs (outputs/):
   eda_ratings_per_wine.png     how many ratings each wine has
   eda_abv.png                  ABV of every wine, outliers marked
   eda_expert_points_price.png  expert points and log-price distributions
-  ablation_matching.csv        matched wines / reviews per method
-  ablation_matching_examples.csv  pairs found only by fuzzy matching
+  ablation_matching.csv        matched wines / reviews / rank agreement per method
+  ablation_matching_examples.csv  pairs found only by fuzzy matching (0.85)
+  ablation_match_quality.csv   hand-checked precision of fuzzy matching per threshold
+  ablation_match_errors.csv    wrong fuzzy pairs at 0.85, with the reason
   ablation_scaling.csv         linear vs quantile (mean, MAE, RMSE vs X-Wines)
   ablation_scaling.png         rating distributions after each conversion
 
@@ -42,6 +47,8 @@ from recsys.config import load_config           # noqa: E402
 from recsys.data import adapter, cleaner, loader  # noqa: E402
 
 FUZZY_THRESHOLDS = [0.80, 0.85, 0.90]   # 0.85 is the default used by run.py
+# hand-checked labels (same / different / unsure) of every fuzzy-only pair
+LABELS_PATH = Path(__file__).resolve().parent / "fuzzy_match_labels.csv"
 WINE_COLOR = "#7A1F3D"                  # same color as recsys/utils/plots.py
 
 
@@ -160,24 +167,38 @@ def eda(items, ratings, expert_raw, out):
 # ---------------------------------------------------------------------------
 # B1. Matching ablation
 # ---------------------------------------------------------------------------
-def matching_ablation(items, expert, expert_raw_names, out):
+def rank_agreement(matches, expert, ratings):
+    """Spearman between the X-Wines mean rating and the mean expert points of
+    the matched wines (no model involved). Wrong matches add noise and lower it."""
+    expert_points = (matches.merge(expert[["expert_id", "points"]], on="expert_id")
+                            .groupby("item_id")["points"].mean())
+    user_mean = ratings.groupby("item_id")["rating"].mean()
+    both = pd.concat([expert_points, user_mean], axis=1, join="inner")
+    if len(both) < 3:
+        return np.nan
+    # Spearman = Pearson correlation of the ranks
+    return round(both.iloc[:, 0].rank().corr(both.iloc[:, 1].rank()), 3)
+
+
+def matching_ablation(items, expert, expert_raw_names, ratings, out):
     section("B1. Ablation - matching X-Wines wines to expert reviews")
     rows = []
 
     def add(method, m):
+        rho = rank_agreement(m, expert, ratings)
         rows.append({"method": method, "matched_wines": m["item_id"].nunique(),
-                     "matched_reviews": len(m)})
-        print(f"  {method:<28} wines={m['item_id'].nunique():>4}  reviews={len(m):>5}")
+                     "matched_reviews": len(m), "spearman_users_vs_experts": rho})
+        print(f"  {method:<28} wines={m['item_id'].nunique():>4}  "
+              f"reviews={len(m):>5}  spearman={rho}")
 
     add("original code", original_match(items, expert_raw_names, expert))
     exact = adapter.match_items(items, expert, method="exact")
     add("exact (normalize + title)", exact)
-    fuzzy_085 = None
+    fuzzy = {}
     for t in FUZZY_THRESHOLDS:
-        m = adapter.match_items(items, expert, method="fuzzy", threshold=t)
-        add(f"fuzzy (threshold {t:.2f})", m)
-        if t == 0.85:
-            fuzzy_085 = m
+        fuzzy[t] = adapter.match_items(items, expert, method="fuzzy", threshold=t)
+        add(f"fuzzy (threshold {t:.2f})", fuzzy[t])
+    fuzzy_085 = fuzzy[0.85]
     pd.DataFrame(rows).to_csv(out / "ablation_matching.csv", index=False)
 
     # pairs that only fuzzy matching finds -> good examples for the PPT
@@ -191,14 +212,76 @@ def matching_ablation(items, expert, expert_raw_names, out):
                   .sort_values("score"))
     extra.to_csv(out / "ablation_matching_examples.csv", index=False)
     print(f"  {len(extra)} pairs found only by fuzzy -> ablation_matching_examples.csv")
-    return fuzzy_085
+    return exact, fuzzy
 
 
 # ---------------------------------------------------------------------------
-# B2. Scaling ablation
+# B2. Quality of the fuzzy matches (hand-checked)
+# ---------------------------------------------------------------------------
+def fuzzy_only_pairs(fuzzy, exact, items, expert):
+    """Pairs found by fuzzy but not by exact, one row per (X-Wines wine,
+    expert wine name) with the number of reviews and the lower of the two
+    similarities (winery, name), i.e. the value compared with the threshold."""
+    extra = fuzzy.merge(exact[["item_id", "expert_id"]], on=["item_id", "expert_id"],
+                        how="left", indicator=True)
+    extra = extra[extra["_merge"] == "left_only"]
+    extra = (extra.merge(items[["item_id", "winery", "name"]], on="item_id")
+                  .merge(expert[["expert_id", "winery", "name"]], on="expert_id",
+                         suffixes=("_xwines", "_expert")))
+    key = ["item_id", "winery_xwines", "name_xwines", "winery_expert", "name_expert"]
+    pairs = extra.groupby(key).size().rename("reviews").reset_index()
+    norm = adapter.normalize_text
+    pairs["min_sim"] = [round(min(adapter._similarity(norm(wx), norm(we)),
+                                  adapter._similarity(norm(nx), norm(ne))), 4)
+                        for wx, nx, we, ne in zip(pairs["winery_xwines"], pairs["name_xwines"],
+                                                  pairs["winery_expert"], pairs["name_expert"])]
+    return pairs
+
+
+def match_quality(items, expert, exact, fuzzy, out):
+    section("B2. Quality check - are fuzzy-only pairs really the same wine?")
+    if not LABELS_PATH.exists():
+        print(f"  [skip] {LABELS_PATH.name} not found")
+        return
+    labels = pd.read_csv(LABELS_PATH)
+    key = ["item_id", "winery_expert", "name_expert"]
+    rows = []
+    for t in FUZZY_THRESHOLDS:
+        pairs = fuzzy_only_pairs(fuzzy[t], exact, items, expert)
+        pairs = pairs.merge(labels[key + ["label", "reason"]], on=key, how="left")
+        pairs["label"] = pairs["label"].fillna("unlabeled")
+        counts = pairs["label"].value_counts()
+        checked = pairs[pairs["label"].isin(["same", "different"])]
+        # precision = share of checked pairs that are really the same wine
+        precision = (checked["label"] == "same").mean()
+        precision_reviews = (checked.loc[checked["label"] == "same", "reviews"].sum()
+                             / checked["reviews"].sum())
+        # exact pairs are assumed correct (25 random exact pairs: 25/25 same wine)
+        n_exact, n_extra = len(exact), pairs["reviews"].sum()
+        overall = (n_exact + precision_reviews * n_extra) / (n_exact + n_extra)
+        rows.append({"threshold": t, "fuzzy_only_pairs": len(pairs),
+                     "same": int(counts.get("same", 0)),
+                     "different": int(counts.get("different", 0)),
+                     "unsure": int(counts.get("unsure", 0)),
+                     "unlabeled": int(counts.get("unlabeled", 0)),
+                     "precision_pairs": round(precision, 3),
+                     "precision_reviews": round(precision_reviews, 3),
+                     "estimated_precision_all_matches": round(overall, 3)})
+        if t == 0.85:
+            errors = pairs[pairs["label"] == "different"].sort_values("min_sim")
+            errors.to_csv(out / "ablation_match_errors.csv", index=False)
+            print("  wrong pairs at 0.85 by reason:",
+                  errors["reason"].value_counts().to_dict())
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "ablation_match_quality.csv", index=False)
+    print(table.to_string(index=False))
+
+
+# ---------------------------------------------------------------------------
+# B3. Scaling ablation
 # ---------------------------------------------------------------------------
 def scaling_ablation(ratings, expert, matches, out):
-    section("B2. Ablation - converting expert points (80-100) to 1-5")
+    section("B3. Ablation - converting expert points (80-100) to 1-5")
     converted = {
         "linear": adapter.scale_points(expert["points"], "linear"),
         "quantile": adapter.scale_points(expert["points"], "quantile",
@@ -262,8 +345,9 @@ def main():
     ratings = cleaner.clean_ratings(ratings)
     expert = cleaner.clean_expert(expert)
 
-    matches = matching_ablation(items, expert, expert["_old_name"], out)
-    scaling_ablation(ratings, expert, matches, out)
+    exact, fuzzy = matching_ablation(items, expert, expert["_old_name"], ratings, out)
+    match_quality(items, expert, exact, fuzzy, out)
+    scaling_ablation(ratings, expert, fuzzy[0.85], out)
     print(f"\nSaved tables and plots to {out}/")
 
 
