@@ -57,7 +57,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] `build_item_features`: one-hot / multi-hot / ABV 스케일링 (+ 블록별 정규화로 균형 조정; 별도 가중치 튜닝은 미진행)
 - [x] `ContentBasedRecommender._fit / score / similar_items`
 - [x] `HybridRecommender.user_weight`: 평점 적은 사용자일수록 콘텐츠 비중↑ (가중치 검증 및 MF 연동 전체 실행·교차 데이터셋 평가 완료)
-- [ ] (추가 분석) 평점 수별 Hybrid 성능을 `outputs/cold_start_analysis.csv`로 해석. 적응형 가중치 자체의 효과를 주장하려면 고정 가중치 Hybrid와 비교 필요
+- [x] (추가 분석) 고정 vs 사용자별 가중치 통제 비교 완료: 기본 2,000명 및 전체 평가 가능 8,904명 비교. 전체 차이는 미미하고, 평점 5개 미만 79명에서 NDCG 소폭 상승·Recall 하락으로 효과가 혼재함. `docs/HYBRID_WEIGHT_EXPERIMENT.md` 참조 (단일 분할 결과, 우월성 확정 불가)
 - [ ] (선택) 와인 임베딩 K-means + PCA/t-SNE 시각화: 미구현, 필수 작업 아님
 
 ### ④ 신우엽 — 평가 · 분석 (`models/baseline.py`, `eval/*`)

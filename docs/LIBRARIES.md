@@ -89,6 +89,8 @@ Delete rows that were actually covered in class.
 Implementation notes: Each categorical/list block is L2-normalized, then concatenated with ABV / 25 and the complete wine vector is normalized again. Profiles use signed `(rating - user mean)` weights from training ratings only. With a single/equal rating history, rated wine vectors have equal weights. Unknown users/items return zero similarity. `model.feature_encoder` retains fitted vocabularies for later datasets. Content scores are similarities, so evaluate ranking metrics rather than RMSE/MAE.
 
 
+Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` shallow-copies the fitted model attribute dictionary so both weight policies share the exact same fitted MF/Content objects. `np.allclose(a, 0)` verifies that regular-user metric differences are zero. `Axes.bar(x, height, width)` with width=0.36 draws paired fixed/adaptive bars; `Axes.set_xticks(x, labels)` includes group sample sizes.
+
 ## Member 4 (신우엽) – evaluation & analysis
 
 | Module | Function / class | Parameters used | Purpose |
