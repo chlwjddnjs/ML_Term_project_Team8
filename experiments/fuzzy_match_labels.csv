@@ -1,0 +1,120 @@
+item_id,winery_xwines,name_xwines,winery_expert,name_expert,min_sim,reviews,label,reason
+158353,Marqués de Reinosa,Rioja Reserva,Marqués de Riscal,Gran Reserva,0.8,1,different,different winery
+163365,Miguel Torres Chile,Dias de Verano Reserva Muscat,Miguel Torres,Días de Verano Muscat,0.8125,1,same,"same wine, only the notation differs"
+179039,Chateau Ste. Michelle,Riesling,Ste. Chapelle,Dry Riesling,0.8,2,different,different winery
+182169,Pine Ridge,Fortis Cabernet Sauvignon,Porcupine Ridge,Cabernet Sauvignon,0.8,2,different,different winery
+100008,Salton,Paradoxo Cabernet Sauvignon,Dalton,Oak Aged Cabernet Sauvignon,0.8148,1,different,different winery
+163388,Casablanca,Nimbus Estate Sauvignon Blanc,Viña Casablanca,Nimbus Estate Single Vineyard Sauvignon Blanc,0.8,1,same,"same wine, only the notation differs"
+163388,Casablanca,Nimbus Estate Sauvignon Blanc,Viña Casablanca,Nimbus Single Vineyard Sauvignon Blanc,0.8,6,same,"same wine, only the notation differs"
+163343,Miguel Torres Chile,Santa Digna Estelado Sparkling Rosé,Miguel Torres,Santa Digna Estelado Rosé Sparkling,0.8125,1,same,"same wine, only the notation differs"
+182386,DeLoach,Private Collection Chardonnay,De Loach,Estate Collection Chardonnay,0.8333,1,different,different line of the same winery
+165555,Casa Silva,Cabernet Sauvignon Rosé,Silvara,Cabernet Sauvignon,0.8333,1,different,rose vs red/white
+105787,Passadouro,Douro Tourgia Franca,Quinta do Passadouro,Passadouro Touriga Franca,0.8444,1,same,"same wine, only the notation differs"
+100003,Castellamare,Cabernet Sauvignon,Castellare,Coniale Cabernet Sauvignon,0.8182,1,different,different winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stags' Leap Winery,The Leap Cabernet Sauvignon,0.8163,2,different,different winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stags' Leap Winery,Cabernet Sauvignon,0.8182,6,different,different winery
+163101,Miguel Torres Chile,Las Mulas Reserva Sauvignon Blanc,Miguel Torres,Las Mulas Reserve Sauvignon Blanc,0.8125,1,same,"same wine, only the notation differs"
+156732,Castillo Clavijo,Rioja Gran Reserva,Castillo Clavijo,Gran Reserva,0.8,4,same,"same wine, only the notation differs"
+155674,Castillo Clavijo,Rioja Reserva,Castillo Clavijo,Gran Reserva,0.8,4,different,different line of the same winery
+167446,Trivento,Golden Reserve Malbec,Trivento,Reserve Malbec,0.8,7,different,different line of the same winery
+163306,Château Los Boldos,Tradition Réserve Cabernet Sauvignon,Château Los Boldos,Cuvée Tradition Cabernet Sauvignon,0.8,1,unsure,unsure (could not verify)
+187359,Yates Family Vineyard,Cabernet Sauvignon,Yates Family Vineyard,Mountain Cabernet Sauvignon,0.8,1,unsure,unsure (could not verify)
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,S.L.V. Cabernet Sauvignon,0.8,3,different,different line of the same winery
+179039,Chateau Ste. Michelle,Riesling,Chateau Ste. Michelle,Dry Riesling,0.8,5,different,different line of the same winery
+184822,Silvan Ridge Winery,Pinot Noir,Russian Ridge,Pinot Noir,0.8,1,different,different winery
+180681,Roederer Estate,L'Ermitage Brut,Roederer Estate,L'Ermitage,0.8,1,same,"same wine, only the notation differs"
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,S.L.V. Estate Cabernet Sauvignon,0.8,1,different,different line of the same winery
+179061,Joseph Phelps,Insignia,Joseph Phelps,Insignia Red,0.8,2,same,"same wine, only the notation differs"
+179044,Kendall-Jackson,Vintner's Reserve Chardonnay,Kendall-Jackson,Vintner's Reserve Rosé,0.8,1,different,rose vs red/white
+103070,Campolargo,Calda Bordaleza Tinto,Campolargo,Calda Bordaleza Red,0.8,1,same,"same wine, only the notation differs"
+113600,Drappier,Blanc de Blancs Brut Champagne,Drappier,Blanc de Blancs Brut Chardonnay,0.8,1,same,"same wine, only the notation differs"
+111468,Ruinart,Blanc de Blancs Brut Champagne,Ruinart,Blanc de Blancs Brut Chardonnay,0.8,4,same,"same wine, only the notation differs"
+106635,Bernhard Huber,Malterdinger Spätburgunder,Bernhard Huber,Alte Reben Spätburgunder,0.8,1,different,different line of the same winery
+106544,Villa Wolf,Pinot Noir Rosé,Villa Wolf,Pinot Noir,0.8,2,different,rose vs red/white
+164604,Santa Carolina,Cellar Selection Sauvignon Blanc,Santa Carolina,Specialties Sauvignon Blanc,0.8077,1,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,Cask 23 Estate Cabernet Sauvignon,0.8077,3,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,Cask 23 Cabernet Sauvignon,0.8077,3,different,different line of the same winery
+136646,Domini Veneti,Valpolicella Classico Superiore,Domìni Veneti,Valpolicella Classico,0.8077,1,different,different line of the same winery
+111590,Château Larrivet Haut-Brion,Pessac-Léognan,Château Laville Haut-Brion,Pessac-Léognan,0.8108,3,different,different winery
+174568,Cape Mentelle,Wallcliffe Sauvignon Blanc-Sémillon,Cape Mentelle,Sauvignon Blanc-Semillon,0.8136,4,different,different line of the same winery
+103474,DJF Vinhos,Grand'Arte Touriga Nacional,DFJ Vinhos,Grand'Arte Rosé Touriga Nacional,0.9,1,different,rose vs red/white
+163835,De Martino,Estate Reserva Chardonnay,De Martino,Reserva de Familia Chardonnay,0.8182,1,different,different line of the same winery
+162743,TerraNoble,Cabernet Sauvignon,TerraNoble,Reserva Cabernet Sauvignon,0.8182,1,different,different line of the same winery
+184540,Shibumi Knoll Vineyards,Cabernet Sauvignon,Shibumi Knoll,Shibumi Vineyard Cabernet Sauvignon,0.8182,1,unsure,unsure (could not verify)
+179058,Black Stallion,Cabernet Sauvignon,Black Stallion,Gaspare Vineyard Cabernet Sauvignon,0.8182,1,different,different line of the same winery
+180707,Muirwood,Cabernet Sauvignon,Muirwood,Vaquero Vineyard Cabernet Sauvignon,0.8182,1,different,different line of the same winery
+183289,Willamette Valley Vineyards,Whole Cluster Rosé of Pinot Noir,Willamette Valley Vineyards,Whole Cluster Fermented Pinot Noir,0.8182,3,different,rose vs red/white
+184122,Cathedral Ridge,Cabernet Sauvignon,Cathedral Ridge,Reserve Cabernet Sauvignon,0.8182,1,different,different line of the same winery
+183229,Geyser Peak,Reserve Cabernet Sauvignon,Geyser Peak,Cabernet Sauvignon,0.8182,5,different,different line of the same winery
+182081,Far Niente,Cabernet Sauvignon,Far Niente,Estate Bottled Cabernet Sauvignon,0.8182,4,same,"same wine, only the notation differs"
+101660,W. & J. Graham's,10 Year Old Tawny Port,W. & J. Graham's,90-year Old Tawny,0.8205,1,different,different line of the same winery
+102448,Fonseca,20 Year Old Tawny Port,Fonseca,10 Year Old Tawny,0.8205,1,different,different line of the same winery
+163465,Château Los Boldos,Tradition Réserve Carmenère,Château Los Boldos,Grande Réserve Carmenère,0.8235,1,different,different line of the same winery
+179058,Black Stallion,Cabernet Sauvignon,Black's Station,Cabernet Sauvignon,0.8276,2,different,different winery
+163839,Santa Ema,Gran Reserva Pinot Noir,Santa Ema,Reserve Pinot Noir,0.8293,1,different,different line of the same winery
+194093,Domäne Wachau,Federspiel Grüner Veltliner,Domäne Wachau,Liebenberg Federspiel Grüner Veltliner,0.8308,1,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,FAY Estate Cabernet Sauvignon,0.8333,2,different,different line of the same winery
+179053,Chateau Ste. Michelle,Cabernet Sauvignon,Ste. Chapelle,Cabernet Sauvignon,0.8333,1,different,different winery
+174330,Insurrection,Red Blend (Shiraz-Cabernet Sauvignon),Insurrection,Shiraz-Cabernet Sauvignon,0.8333,2,same,"same wine, only the notation differs"
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,Fay Estate Cabernet Sauvignon,0.8333,1,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,SLV Cabernet Sauvignon,0.8333,1,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,Fay Cabernet Sauvignon,0.8333,2,different,different line of the same winery
+179016,Stag's Leap Wine Cellars,ARTEMIS Cabernet Sauvignon,Stag's Leap Wine Cellars,Fay Vineyard Cabernet Sauvignon,0.8333,1,different,different line of the same winery
+162519,Montes,Reserva Cabernet Sauvignon (Classic),Montes,Reserve Cabernet Sauvignon,0.8333,1,same,"same wine, only the notation differs"
+163835,De Martino,Estate Reserva Chardonnay,De Martino,Legado Reserva Chardonnay,0.8372,3,different,different line of the same winery
+182169,Pine Ridge,Fortis Cabernet Sauvignon,Pine Ridge,Estate Vineyards Cabernet Sauvignon,0.8372,1,different,different line of the same winery
+182169,Pine Ridge,Fortis Cabernet Sauvignon,Pine Ridge,Cabernet Sauvignon,0.8372,21,different,different line of the same winery
+174274,Oxford Landing,Cabernet Sauvignon-Shiraz,Oxford Landing,Cabernet Sauvignon,0.8372,2,different,different line of the same winery
+184745,D.R. Stephens,Cabernet Sauvignon,D.R. Stephens,D.R. II Cabernet Sauvignon,0.8372,1,different,different line of the same winery
+155308,La Rioja Alta,Rioja Gran Reserva 904,La Rioja Alta,Gran Reserva 904,0.8421,2,same,"same wine, only the notation differs"
+167431,Rutini,Trumpeter Malbec,Rutini,Trumpeter Malbec-Syrah,0.8421,2,different,different line of the same winery
+194093,Domäne Wachau,Federspiel Grüner Veltliner,Domäne Wachau,Terrassen Federspiel Grüner Veltliner,0.8438,8,same,"same wine, only the notation differs"
+164250,Mancura,Guardian Reserva Chardonnay,Mancura,Guardián Reserva Carignan,0.8462,1,different,different line of the same winery
+180405,14 Hands,Hot to Trot White Blend,14 Hands,Hot To Trot White,0.85,1,same,"same wine, only the notation differs"
+180405,14 Hands,Hot to Trot White Blend,14 Hands,Hot to Trot White,0.85,2,same,"same wine, only the notation differs"
+104878,Quarles Harris,10 Year Old Tawny Porto,Quarles Harris,10-Year-Old Tawny,0.85,1,same,"same wine, only the notation differs"
+143130,Gaja,Costa Russi Grappa di Nebbiolo,Gaja,Costa Russi Nebbiolo,0.8511,2,different,grappa vs wine
+196663,Hiedler,Maximum Reserve Grüner Veltliner,Hiedler,Thal Reserve Grüner Veltliner,0.8525,2,different,different line of the same winery
+174177,Penfolds,Koonunga Hill Shiraz-Cabernet,Penfolds,Koonunga Hill Shiraz-Cabernet Sauvignon,0.8529,1,same,"same wine, only the notation differs"
+193489,Nobilo,Regional Collection Marlborough Sauvignon Blanc,Nobilo,Regional Collection Sauvignon Blanc,0.8537,4,same,"same wine, only the notation differs"
+180260,Priest Ranch,Cabernet Sauvignon,Priest Ranch,Estate Grown Cabernet Sauvignon,0.8571,1,same,"same wine, only the notation differs"
+193487,Mud House,Sauvignon Blanc,Mud House,Swan Sauvignon Blanc,0.8571,1,different,different line of the same winery
+144632,Cantina Valpolicella Negrar,Recioto della Valpolicella Classico,Cantina Valpolicella Negrar,Amarone della Valpolicella Classico,0.8571,1,different,different line of the same winery
+162738,Undurraga,Merlot (U),Undurraga,Merlot,0.8571,1,same,"same wine, only the notation differs"
+163835,De Martino,Estate Reserva Chardonnay,De Martino,Prima Reserva Chardonnay,0.8571,1,different,different line of the same winery
+183289,Willamette Valley Vineyards,Whole Cluster Rosé of Pinot Noir,Willamette Valley Vineyards,Whole Cluster Pinot Noir,0.8571,3,different,rose vs red/white
+112010,Château de Ribebon,Bordeaux Supérieur,Château de Riberon,Bordeaux Supérieur,0.8571,1,unsure,unsure (could not verify)
+116893,Le Grand Courtâge,Grande Cuvée Blanc de Blancs Brut,Le Grand Courtage,Grande Cuvée Blanc de Blancs Brut Sparkling,0.8571,1,same,"same wine, only the notation differs"
+111544,Ruinart,Dom Ruinart Blanc de Blancs Brut Champagne,Ruinart,Dom Ruinart Blanc de Blancs Brut Chardonnay,0.8608,1,same,"same wine, only the notation differs"
+180799,Bota Box,Nighthawk Black Red Blend,Bota Box,Nighthawk Black Red,0.8636,2,same,"same wine, only the notation differs"
+104976,Bulas,Late Bottled Vintage Porto,Bulas,Late Bottled Vintage,0.8696,1,same,"same wine, only the notation differs"
+163306,Château Los Boldos,Tradition Réserve Cabernet Sauvignon,Château Los Boldos,Grande Réserve Cabernet Sauvignon,0.8696,1,different,different line of the same winery
+104797,Churchill's,Quinta Da Gricha Vintage Port,Churchill's,Quinta da Gricha Vintage,0.8718,4,same,"same wine, only the notation differs"
+101660,W. & J. Graham's,10 Year Old Tawny Port,W. & J. Graham's,10-Year-Old Tawny,0.8718,1,same,"same wine, only the notation differs"
+102448,Fonseca,20 Year Old Tawny Port,Fonseca,20 Year Old Tawny,0.8718,1,same,"same wine, only the notation differs"
+167464,Doña Paula,Los Cardos Malbec,Doña Paula,Los Cardos Rosé Malbec,0.8718,1,different,rose vs red/white
+162502,Montes,Montes Alpha Cabernet Sauvignon,Montes,Alpha Cabernet Sauvignon,0.8727,3,same,"same wine, only the notation differs"
+101617,Quinta do Noval,Cedro do Noval,Quinta do Noval,Cedro do Noval Red,0.875,3,same,"same wine, only the notation differs"
+179059,Faust,Cabernet Sauvignon,Faust,The Pact Cabernet Sauvignon,0.878,1,different,different line of the same winery
+140819,Giuseppe Rinaldi,Cannubi San Lorenzo-Ravera Barolo,Giuseppe Rinaldi,Cannubi San Lorenzo Ravera,0.8814,3,same,"same wine, only the notation differs"
+170982,Boekenhoutskloof,The Chocolate Block,Boekenhoutskloof,The Chocolate Block Red,0.8824,1,same,"same wine, only the notation differs"
+171256,Ernie Els,Proprietor's Blend,Ernie Els,Proprietor's Red,0.8824,1,same,"same wine, only the notation differs"
+101610,W. & J. Graham's,Late Bottled Vintage Port,W. & J. Graham's,Late Bottled Vintage,0.8889,2,same,"same wine, only the notation differs"
+141176,Tenuta delle Terre Nere,Etna Santo Spirito Bianco,Tenuta delle Terre Nere,Santo Spirito Bianco,0.8889,1,same,"same wine, only the notation differs"
+193598,Argyros,Assyrtiko,Argyros,Estate Assyrtico,0.8889,1,same,"same wine, only the notation differs"
+179040,Beringer,Knights Valley Cabernet Sauvignon,Beringer,Knights Valley Reserve Cabernet Sauvignon,0.8919,1,different,different line of the same winery
+179034,Gnarly Head,Old Vine Zinfandel,Gnarly Head,Old Vine Zin Zinfandel,0.9,2,same,"same wine, only the notation differs"
+171256,Ernie Els,Proprietor's Blend,Ernie Els,Proprietor's Blend Red,0.9,1,same,"same wine, only the notation differs"
+103474,DJF Vinhos,Grand'Arte Touriga Nacional,DFJ Vinhos,Grand'Arte Touriga Nacional,0.9,3,same,"same wine, only the notation differs"
+193552,Meinklang,Burgenland Red,Meinklang,Burgenlandrot Red,0.9032,1,same,"same wine, only the notation differs"
+101677,Quinta do Vallado,Reserva (Field Blend),Quinta do Vallado,Reserva Field Blend Red,0.9048,6,same,"same wine, only the notation differs"
+184814,Baldacci,Four Sons Fraternity,Baldacci,Four Sons Fraternity Red,0.9091,1,same,"same wine, only the notation differs"
+179059,Faust,Cabernet Sauvignon,Fausta,Cabernet Sauvignon,0.9091,1,different,different winery
+168273,Luigi Bosca,A Rosé Is A Rosé Is A Rosé,Luigi Bosca,A Rosé Is A Rosé Is A Rosé Rosé,0.9123,1,same,"same wine, only the notation differs"
+171266,Simonsig,Frans Malan Cape Blend,Simonsig,Frans Malan Cape Blend Red,0.9167,1,same,"same wine, only the notation differs"
+106629,Meyer-Näkel,Spätburgunder,Meyer-Näkel,S Spätburgunder,0.9286,1,unsure,unsure (could not verify)
+193482,Brancott Estate,Sauvignon Blanc,Brancott,B Sauvignon Blanc,0.9375,1,unsure,unsure (could not verify)
+167079,Bodega Garzón,Reserva Cabernet Franc,Garzón,Reserve Cabernet Franc,0.9545,1,same,"same wine, only the notation differs"
+192711,Cave Spring,Indian Summer Select Late Harvest Riesling,Cave Spring,Indian Summer Select Late Harvest VQA Riesling,0.9545,1,same,"same wine, only the notation differs"
+111538,Gérard Bertrand,Grand Terroir Tautavel Grenache-Syrah-Carignan,Gérard Bertrand,Grand Terroir Tautavel Grenache-Syrah-Carignan Red,0.9583,1,same,"same wine, only the notation differs"
+179034,Gnarly Head,Old Vine Zinfandel,Gnarly Head,Old Vines Zinfandel,0.973,1,same,"same wine, only the notation differs"
