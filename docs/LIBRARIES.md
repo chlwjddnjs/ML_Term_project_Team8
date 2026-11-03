@@ -107,3 +107,7 @@ Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` sh
 | `pandas` | `DataFrame.nlargest(n, columns)` | `columns="abs_error"` | Picks the n worst predictions for the failure analysis. |
 | `pandas` | `DataFrame.agg(**named)` | `MAE=("abs_error", "mean")`, … | Several summary statistics per user/item group in `error_by_group`. |
 | built-in | `getattr(obj, name, default)` | `name="b_i"`, `default=None` | Uses MF's item bias for the cross-dataset score when the model has one. |
+| `pandas` | `DataFrame.pivot(index, columns, values)` | `index="group"`, `columns="model"`, `values="MAE"` | Reshapes the per-group error table to one column per model so it can be drawn as grouped bars (`failure_analysis.py`). |
+| `pandas` | `DataFrame.plot(kind, figsize, rot)` | `kind="bar"`, `rot=0`: horizontal x labels | Grouped bar chart of MAE per user/wine group, one bar per model (`failure_analysis.py`). |
+| `matplotlib` | `plt.subplots(figsize)`, `Axes.plot(x, y, marker, label)`, `Figure.savefig(path, dpi)` | `marker="o"`, `dpi=150` | Line chart of the mean signed error per true rating, saved as PNG (`failure_analysis.py`). |
+| `sys` | `sys.path.insert(0, path)`, `sys.stdout.reconfigure(errors)` | `path`: project root; `errors="replace"` | Lets a script in `experiments/` import the `recsys` package; prints wine names with accents without crashing on any console. |

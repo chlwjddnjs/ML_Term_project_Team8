@@ -84,3 +84,47 @@ def error_by_group(model, test, by="user_n_train",
     g = g.reset_index()
     g.insert(0, "model", model.name)
     return g
+
+
+def error_by_true_rating(model, test):
+    """Mean error per true rating value (1.0, 1.5, ... 5.0).
+
+    mean_error > 0 means the model predicts too HIGH for that rating, < 0 too LOW.
+    A model that pulls every prediction toward the global mean shows a large
+    positive error for low ratings and a negative error for 5.0 ratings."""
+    df = predictions_with_errors(model, test)
+    g = df.groupby("rating").agg(
+        MAE=("abs_error", "mean"), mean_error=("error", "mean"),
+        mean_pred=("pred", "mean"), n_ratings=("abs_error", "size"))
+    g = g.reset_index()
+    g.insert(0, "model", model.name)
+    return g
+
+
+def failure_patterns(model, test, n=20, few=5, extreme=(2.0, 5.0)):
+    """How much more often the worst predictions have each known failure pattern
+    than test ratings in general.
+
+    Patterns (a rating can have several):
+        cold user   - user has fewer than `few` train ratings
+        rare wine   - wine has fewer than `few` train ratings
+        low rating  - true rating <= extreme[0]
+        top rating  - true rating >= extreme[1]
+    Returns one row per pattern: share among the n worst predictions, share among
+    all test ratings, and their ratio (lift; > 1 means the pattern is
+    over-represented in the failures)."""
+    df = predictions_with_errors(model, test)
+    worst = df.nlargest(n, "abs_error")
+    checks = {
+        f"cold user (<{few} train ratings)": lambda d: d["user_n_train"] < few,
+        f"rare wine (<{few} train ratings)": lambda d: d["item_n_train"] < few,
+        f"low rating (<= {extreme[0]})": lambda d: d["rating"] <= extreme[0],
+        f"top rating (>= {extreme[1]})": lambda d: d["rating"] >= extreme[1],
+    }
+    rows = []
+    for pattern, check in checks.items():
+        share_worst, share_all = check(worst).mean(), check(df).mean()
+        rows.append({"model": model.name, "pattern": pattern,
+                     "share_in_worst": share_worst, "share_in_all_test": share_all,
+                     "lift": share_worst / share_all if share_all > 0 else np.nan})
+    return pd.DataFrame(rows)

@@ -72,7 +72,8 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] `ItemKNNRecommender` (메모리 기반 CF 베이스라인)
 - [x] `cross_dataset.model_quality_per_item` (교차 데이터셋 비교용 와인별 점수)
 - [x] `analysis.worst_predictions`: 실패 사례 추출 함수 구현
-- [ ] 실패 사례 분석 → PPT: 함수 호출로 실제 사례를 추출·저장하고, 사용자/와인 정보와 함께 오류 원인 해석 필요 (`run.py`에는 자동 호출·저장 연결이 없음)
+- [x] 실패 사례 분석: `experiments/failure_analysis.py`로 ItemKNN·MF의 worst 20개를 사용자/와인 정보와 함께 `outputs/failure_worst_*.csv`로 저장, 실패 패턴·실제 점수별 오차·평가 수별 오차 표와 그래프 생성 (Slim 실행 확인). 결론: 큰 오차는 거의 전부 평소 후한 사용자가 인기 와인에 준 1~2점 평점
+- [ ] 실패 사례 PPT 반영: 대표 사례 표 + `failure_error_by_rating.png`
 - [x] 전체 5개 모델 비교표·그래프, 콜드스타트 분석 및 교차 데이터셋 결과 생성 (`outputs/`)
 - [ ] 최종 비교표·그래프 정리: 추가 실험 후 최종 결과를 확정하고 발표용 표·그림 선정 및 해석 필요. 현재 Hybrid는 MF·Content보다 NDCG가 높지만 Popularity보다 낮음
 - [x] (기존 베이스 기능) `PopularityRecommender`: 평점 수 중심의 비개인화 추천 기준 모델 (전체 실행 확인)
