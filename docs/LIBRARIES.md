@@ -89,6 +89,8 @@ Delete rows that were actually covered in class.
 Implementation notes: Each categorical/list block is L2-normalized, then concatenated with ABV / 25 and the complete wine vector is normalized again. Profiles use signed `(rating - user mean)` weights from training ratings only. With a single/equal rating history, rated wine vectors have equal weights. Unknown users/items return zero similarity. `model.feature_encoder` retains fitted vocabularies for later datasets. Content scores are similarities, so evaluate ranking metrics rather than RMSE/MAE.
 
 
+Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` shallow-copies the fitted model attribute dictionary so both weight policies share the exact same fitted MF/Content objects. `np.allclose(a, 0)` verifies that regular-user metric differences are zero. `Axes.bar(x, height, width)` with width=0.36 draws paired fixed/adaptive bars; `Axes.set_xticks(x, labels)` includes group sample sizes.
+
 ## Member 4 (신우엽) – evaluation & analysis
 
 | Module | Function / class | Parameters used | Purpose |
@@ -105,3 +107,11 @@ Implementation notes: Each categorical/list block is L2-normalized, then concate
 | `pandas` | `DataFrame.nlargest(n, columns)` | `columns="abs_error"` | Picks the n worst predictions for the failure analysis. |
 | `pandas` | `DataFrame.agg(**named)` | `MAE=("abs_error", "mean")`, … | Several summary statistics per user/item group in `error_by_group`. |
 | built-in | `getattr(obj, name, default)` | `name="b_i"`, `default=None` | Uses MF's item bias for the cross-dataset score when the model has one. |
+| `pandas` | `DataFrame.pivot(index, columns, values)` | `index="group"`, `columns="model"`, `values="MAE"` | Reshapes the per-group error table to one column per model so it can be drawn as grouped bars (`failure_analysis.py`). |
+| `pandas` | `DataFrame.plot(kind, figsize, rot)` | `kind="bar"`, `rot=0`: horizontal x labels | Grouped bar chart of MAE per user/wine group, one bar per model (`failure_analysis.py`). |
+| `matplotlib` | `plt.subplots(figsize)`, `Axes.plot(x, y, marker, label)`, `Figure.savefig(path, dpi)` | `marker="o"`, `dpi=150` | Line chart of the mean signed error per true rating, saved as PNG (`failure_analysis.py`). |
+| `sys` | `sys.path.insert(0, path)`, `sys.stdout.reconfigure(errors)` | `path`: project root; `errors="replace"` | Lets a script in `experiments/` import the `recsys` package; prints wine names with accents without crashing on any console. |
+| `numpy` | `np.isin(element, test_elements)` | `element`: all wine ids, `test_elements`: wines the user rated in train | Removes already-rated wines before the random baseline draws its top-k (`ranking_analysis.py`). |
+| `numpy` | `Generator.choice(a, size, replace)` | `size=k`, `replace=False` | Random top-k recommendation used as the lower bound for the ranking metrics (`ranking_analysis.py`). |
+| `pandas` | `Series.isin(values)` | `values`: set of the 50 most-rated wines | Share of recommendations / hits / relevant test ratings that fall on the popular head (`ranking_analysis.py`). |
+| `matplotlib` | `Axes.bar(x, height, width, label)`, `Axes.set_xticks(ticks, labels)` | `width=0.4`, bars shifted by ±0.2 | Side-by-side bars of overall vs long-tail NDCG per model (`ranking_analysis.py`). |
