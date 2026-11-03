@@ -76,6 +76,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [ ] 실패 사례 PPT 반영: 대표 사례 표 + `failure_error_by_rating.png`
 - [x] 전체 5개 모델 비교표·그래프, 콜드스타트 분석 및 교차 데이터셋 결과 생성 (`outputs/`)
 - [ ] 최종 비교표·그래프 정리: 추가 실험 후 최종 결과를 확정하고 발표용 표·그림 선정 및 해석 필요. 현재 Hybrid는 MF·Content보다 NDCG가 높지만 Popularity보다 낮음
+- [x] (추가 분석) 순위 실패 해석: `experiments/ranking_analysis.py`로 Popularity 우위 원인 분석 (Slim 실행 확인). 상위 50개(5%) 와인이 테스트 정답의 37%를 차지하는 인기 편향 때문이며, 이 50개를 정답에서 빼면 Popularity NDCG는 0이고 Content > Hybrid > MF 순. MF는 추천 와인 23개로 개인화가 약하고 ItemKNN 순위는 Random 수준. `outputs/ranking_*` 생성
 - [x] (기존 베이스 기능) `PopularityRecommender`: 평점 수 중심의 비개인화 추천 기준 모델 (전체 실행 확인)
 - [x] (추가 구현) `predictions_with_errors`: 실제 평점·예측·오차·사용자/와인 학습 이력 수를 합친 상세 표 생성. 함수 구현 완료이며 기본 `run.py`에는 자동 호출·저장이 없음
 - [x] (추가 구현) `error_by_group`: 사용자 또는 와인의 학습 이력 수별 MAE·평균 오차·평가 건수 집계. 함수 구현 완료이며 실제 결과 생성·해석은 실패 사례 분석 작업에 포함

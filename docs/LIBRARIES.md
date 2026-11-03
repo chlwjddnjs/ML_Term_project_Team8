@@ -111,3 +111,7 @@ Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` sh
 | `pandas` | `DataFrame.plot(kind, figsize, rot)` | `kind="bar"`, `rot=0`: horizontal x labels | Grouped bar chart of MAE per user/wine group, one bar per model (`failure_analysis.py`). |
 | `matplotlib` | `plt.subplots(figsize)`, `Axes.plot(x, y, marker, label)`, `Figure.savefig(path, dpi)` | `marker="o"`, `dpi=150` | Line chart of the mean signed error per true rating, saved as PNG (`failure_analysis.py`). |
 | `sys` | `sys.path.insert(0, path)`, `sys.stdout.reconfigure(errors)` | `path`: project root; `errors="replace"` | Lets a script in `experiments/` import the `recsys` package; prints wine names with accents without crashing on any console. |
+| `numpy` | `np.isin(element, test_elements)` | `element`: all wine ids, `test_elements`: wines the user rated in train | Removes already-rated wines before the random baseline draws its top-k (`ranking_analysis.py`). |
+| `numpy` | `Generator.choice(a, size, replace)` | `size=k`, `replace=False` | Random top-k recommendation used as the lower bound for the ranking metrics (`ranking_analysis.py`). |
+| `pandas` | `Series.isin(values)` | `values`: set of the 50 most-rated wines | Share of recommendations / hits / relevant test ratings that fall on the popular head (`ranking_analysis.py`). |
+| `matplotlib` | `Axes.bar(x, height, width, label)`, `Axes.set_xticks(ticks, labels)` | `width=0.4`, bars shifted by ±0.2 | Side-by-side bars of overall vs long-tail NDCG per model (`ranking_analysis.py`). |
