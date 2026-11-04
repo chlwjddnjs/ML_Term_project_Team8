@@ -44,8 +44,10 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] `match_items(method="fuzzy")`: 전체 실행에서 169개 와인과 415건 전문가 리뷰 연결 확인
 - [x] `scale_points(method="quantile")`: 분위수 기반 척도 변환 구현 (현재 `run.py` 기본 실행은 linear 사용)
 - [x] `clean_items / clean_ratings / clean_expert`: 정제 구현 및 전체 실행 확인
-- [ ] ablation 결과: `experiments/data_analysis.py`는 추가됨. exact vs fuzzy 매칭 수, linear vs quantile 변환의 실제 결과를 확인·비교하고 해석 정리 필요
-- [ ] 매칭 품질 검토: 연결된 와인 일부를 직접 확인하고 오매칭 가능성과 비교 범위(169개)의 한계 정리
+- [x] ablation 분석 구현: `experiments/data_analysis.py`에 원본/exact/fuzzy(0.80·0.85·0.90) 매칭 수·순위 상관 비교, linear/quantile 분포·사용자 평균과의 오차 비교 구현. 결과는 `outputs/ablation_*`로 저장 (모델 재학습 성능 비교가 아닌 데이터 정렬 방법 비교)
+- [x] ablation Slim 실행·결과 확인 (2026-11-04): 원본 0개 → 정규화 exact 134개 → fuzzy(0.85) 169개 와인. linear/quantile의 사용자 평균 대비 MAE는 1.052/0.340, 순위 상관은 0.700/0.693 (척도 정렬 효과이며 quantile 모델 성능 개선을 뜻하지 않음)
+- [x] 매칭 품질 검토 자료: `experiments/fuzzy_match_labels.csv`에 fuzzy-only 와인 쌍의 same/different/unsure 라벨·판정 이유 추가. `data_analysis.py`가 기준값별 품질과 오매칭 표 생성. 라벨은 팀원 판정이며 독립 정답은 아님; unsure 제외·exact 매칭 정답 가정을 사용한 추정 정확도라는 한계 포함
+- [ ] 발견된 오매칭 처리 방침 확정: 기본 0.85의 fuzzy-only 49쌍 중 same 34 / different 12 / unsure 3. 현재 `run.py`는 이 라벨로 필터링하지 않으므로, 검증된 쌍만 사용할지·기준을 보완할지 정하고 변경 시 교차 데이터셋 평가 재실행 필요
 - [x] (기존 보조 기능) `parse_list / apply_column_map`: 리스트 문자열 파싱 및 설정 기반 공통 컬럼 변환. 원본 컬럼이 없으면 경고 후 결측값으로 채움 (공통 베이스 포함)
 - [x] (추가 구현) `iqr_bounds`: 가격의 로그 스케일 IQR 범위를 계산해 이상치 보정에 활용 (전체 정제 실행 확인)
 
@@ -76,10 +78,11 @@ git push                          # 거절되면 git pull 후 다시 push
 - [ ] 실패 사례 PPT 반영: 대표 사례 표 + `failure_error_by_rating.png`
 - [x] 전체 5개 모델 비교표·그래프, 콜드스타트 분석 및 교차 데이터셋 결과 생성 (`outputs/`)
 - [ ] 최종 비교표·그래프 정리: 추가 실험 후 최종 결과를 확정하고 발표용 표·그림 선정 및 해석 필요. 현재 Hybrid는 MF·Content보다 NDCG가 높지만 Popularity보다 낮음
-- [x] (추가 분석) 순위 실패 해석: `experiments/ranking_analysis.py`로 Popularity 우위 원인 분석 (Slim 실행 확인). 상위 50개(5%) 와인이 테스트 정답의 37%를 차지하는 인기 편향 때문이며, 이 50개를 정답에서 빼면 Popularity NDCG는 0이고 Content > Hybrid > MF 순. MF는 추천 와인 23개로 개인화가 약하고 ItemKNN 순위는 Random 수준. `outputs/ranking_*` 생성
+- [x] (추가 분석) 순위 실패 해석: `experiments/ranking_analysis.py` Slim 재실행 확인 (2026-11-04). 상위 50개(5%) 와인에 테스트 정답의 36.8%가 집중돼 Popularity에 유리한 평가 특성을 보여줌 (우위의 유일한 원인으로 단정 불가). 기존 추천 목록을 유지한 채 이 50개를 정답에서 제외한 tail 평가에서는 Content > Hybrid > MF, Popularity NDCG는 0. MF는 23개 와인에 추천이 집중하고 ItemKNN NDCG는 단일 Random 실행보다 낮음. `outputs/ranking_*` 생성; Random 비교의 통계적 유의성은 검증하지 않음
 - [x] (기존 베이스 기능) `PopularityRecommender`: 평점 수 중심의 비개인화 추천 기준 모델 (전체 실행 확인)
-- [x] (추가 구현) `predictions_with_errors`: 실제 평점·예측·오차·사용자/와인 학습 이력 수를 합친 상세 표 생성. 함수 구현 완료이며 기본 `run.py`에는 자동 호출·저장이 없음
-- [x] (추가 구현) `error_by_group`: 사용자 또는 와인의 학습 이력 수별 MAE·평균 오차·평가 건수 집계. 함수 구현 완료이며 실제 결과 생성·해석은 실패 사례 분석 작업에 포함
+- [x] (추가 구현) `predictions_with_errors`: 실제 평점·예측·오차·사용자/와인 학습 이력 수를 합친 상세 표 생성. `failure_analysis.py`에서 사용·실행 확인 (기본 `run.py`에는 자동 호출·저장이 없음)
+- [x] (추가 구현) `error_by_group`: 사용자 또는 와인의 학습 이력 수별 MAE·평균 오차·평가 건수 집계. Slim 실행으로 `failure_error_by_user_group.csv / failure_error_by_item_group.csv` 및 그래프 생성 확인
+- [x] (추가 구현) `error_by_true_rating / failure_patterns`: 실제 평점별 오차 및 worst 사례의 저평점·적은 학습 이력 등 패턴 비율 집계. `failure_analysis.py` Slim 실행 및 결과 저장 확인
 - [x] (평가 기능) `rank_agreement / expert_score_per_item`: 매칭된 와인의 전문가 평점 집계, Spearman·p-value·Top-K 겹침 계산 (169개 와인으로 전체 실행 확인)
 - [x] (평가 기능) `cold_start_analysis`: 사용자 학습 평점 수별 순위 지표와 사용자 수 집계 (`outputs/cold_start_analysis.csv` 생성 확인)
 
