@@ -47,7 +47,8 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] ablation 분석 구현: `experiments/data_analysis.py`에 원본/exact/fuzzy(0.80·0.85·0.90) 매칭 수·순위 상관 비교, linear/quantile 분포·사용자 평균과의 오차 비교 구현. 결과는 `outputs/ablation_*`로 저장 (모델 재학습 성능 비교가 아닌 데이터 정렬 방법 비교)
 - [x] ablation Slim 실행·결과 확인 (2026-11-04): 원본 0개 → 정규화 exact 134개 → fuzzy(0.85) 169개 와인. linear/quantile의 사용자 평균 대비 MAE는 1.052/0.340, 순위 상관은 0.700/0.693 (척도 정렬 효과이며 quantile 모델 성능 개선을 뜻하지 않음)
 - [x] 매칭 품질 검토 자료: `experiments/fuzzy_match_labels.csv`에 fuzzy-only 와인 쌍의 same/different/unsure 라벨·판정 이유 추가. `data_analysis.py`가 기준값별 품질과 오매칭 표 생성. 라벨은 팀원 판정이며 독립 정답은 아님; unsure 제외·exact 매칭 정답 가정을 사용한 추정 정확도라는 한계 포함
-- [ ] 발견된 오매칭 처리 방침 확정: 기본 0.85의 fuzzy-only 49쌍 중 same 34 / different 12 / unsure 3. 현재 `run.py`는 이 라벨로 필터링하지 않으므로, 검증된 쌍만 사용할지·기준을 보완할지 정하고 변경 시 교차 데이터셋 평가 재실행 필요
+- [x] 오매칭 제외 비교 평가 완료 (2026-11-05): 별도 `experiments/compare_clean_matches.py`에서 different·unsure 15쌍/리뷰 연결 19건 제외. 와인 169→163개, 리뷰 연결 415→396건. Hybrid Spearman 0.709090→0.690305, Top-10 겹침 0.5 유지. `docs/CLEAN_MATCH_COMPARISON.md` 참조; 기존 결과·기본 run.py 매칭은 보존
+- [ ] 최종 교차 평가 결과 확정·제출 반영: 정제 후 163개 결과와 제외 기준을 사용하고, 기본 `run.py`는 아직 라벨 필터를 적용하지 않으므로 재현 명령과 결과 파일을 명시
 - [x] (기존 보조 기능) `parse_list / apply_column_map`: 리스트 문자열 파싱 및 설정 기반 공통 컬럼 변환. 원본 컬럼이 없으면 경고 후 결측값으로 채움 (공통 베이스 포함)
 - [x] (추가 구현) `iqr_bounds`: 가격의 로그 스케일 IQR 범위를 계산해 이상치 보정에 활용 (전체 정제 실행 확인)
 
