@@ -55,7 +55,8 @@ git push                          # 거절되면 git pull 후 다시 push
 ### ② 김한결 — Matrix Factorization (`models/mf.py`)
 - [x] `_fit`: SGD 학습, epoch마다 `self.history`에 train_rmse 기록 → 전체 실행 및 `outputs/learning_curve_MF.png` 저장 확인
 - [x] `score`: 벡터 연산으로 여러 아이템 한 번에 예측, 모르는 사용자는 `mu + b_i` (전체 평점·순위 평가 완료)
-- [ ] 하이퍼파라미터 실험: `experiments/tune_mf.py`는 추가됨. `n_factors`, `reg`, `learning_rate`별 실제 결과·선정 근거 및 train/validation 과적합 그래프 확인·정리 필요 (튜닝에는 test가 아닌 별도 validation 사용)
+- [x] 하이퍼파라미터 실험: 팀원 제공 MF 실험 문서에서 validation 기반 후보 비교·설정 선정 근거 확인 (`experiments/tune_mf.py`). 원본 튜닝 출력은 별도 보관 필요
+- [x] train/validation 과적합 확인 (2026-11-06): `experiments/curve_mf.py` Slim 40 epoch 실행, train 107,538건/valid 12,576건. validation RMSE 최저 0.4842는 19 epoch, 20 epoch 0.4847, 40 epoch 0.4869. 후반 train 오차 감소·valid 오차 소폭 상승으로 과적합 징후 관찰. 현재 20 epoch는 최소점 부근이며 40 epoch까지 늘릴 이점은 이 실험에서 없음. `outputs/learning_curve_MF_valid.png / .csv` 생성 확인
 - [x] (추가 구현) `reg_bias / bias_damping`: 편향 정규화를 분리하고 평가 수가 적은 와인의 `b_i`를 상대적으로 강하게 억제. 현재 `config.yaml`의 `bias_damping=10`으로 전체 실행 확인
 - [x] (추가 구현) `set_validation / _rmse`: 별도 validation을 설정하면 epoch별 검증 RMSE도 `history`에 기록 (`run.py` 기본 실행은 train RMSE만 기록)
 - [x] (추가 구현) `experiments/check_mf_top.py`: 추천 빈도, 추천 와인의 평가 수, 상위 아이템 편향을 표로 저장하는 분석 스크립트. 팀원 제공 MF 실험 문서에 관련 분석 결과가 있음 (원본 출력 파일은 별도 확인 필요)
