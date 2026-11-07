@@ -41,7 +41,7 @@ git push                          # 거절되면 git pull 후 다시 push
 
 ### ① 김도원 — 데이터 · DatasetAdapter (`data/adapter.py`, `data/cleaner.py`)
 - [x] EDA 자료 생성: `cleaner.quality_report` 출력 + `outputs/eda_rating_distribution.png` 생성 확인
-- [ ] EDA 해석을 PPT "Data exploration"에 반영: 결측치·중복·분포와 정제 이유 설명 필요
+- [x] 데이터 탐색·정제 PPT 반영 (3–4장, 10장): 두 데이터셋의 역할·규모·점수 범위, 결측 범주 처리·중복 제거·도수 보정, 와인별 평점 수의 편중을 설명
 - [x] `parse_winemag_title`: 제목에서 와이너리·연도·(지역) 제거 → 와인 이름
 - [x] `normalize_text`: 악센트·구두점·흔한 단어(winery, domaine…) 제거
 - [x] `match_items(method="fuzzy")`: 전체 실행에서 169개 와인과 415건 전문가 리뷰 연결 확인
@@ -51,7 +51,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] ablation Slim 실행·결과 확인 (2026-11-04): 원본 0개 → 정규화 exact 134개 → fuzzy(0.85) 169개 와인. linear/quantile의 사용자 평균 대비 MAE는 1.052/0.340, 순위 상관은 0.700/0.693 (척도 정렬 효과이며 quantile 모델 성능 개선을 뜻하지 않음)
 - [x] 매칭 품질 검토 자료: `experiments/fuzzy_match_labels.csv`에 fuzzy-only 와인 쌍의 same/different/unsure 라벨·판정 이유 추가. `data_analysis.py`가 기준값별 품질과 오매칭 표 생성. 라벨은 팀원 판정이며 독립 정답은 아님; unsure 제외·exact 매칭 정답 가정을 사용한 추정 정확도라는 한계 포함
 - [x] 오매칭 제외 비교 평가 완료 (2026-11-05): 별도 `experiments/compare_clean_matches.py`에서 different·unsure 15쌍/리뷰 연결 19건 제외. 와인 169→163개, 리뷰 연결 415→396건. Hybrid Spearman 0.709090→0.690305, Top-10 겹침 0.5 유지. `docs/CLEAN_MATCH_COMPARISON.md` 참조; 기존 결과·기본 run.py 매칭은 보존
-- [ ] 최종 교차 평가 결과 확정·제출 반영: 정제 후 163개 결과와 제외 기준을 사용하고, 기본 `run.py`는 아직 라벨 필터를 적용하지 않으므로 재현 명령과 결과 파일을 명시
+- [x] 정제 후 교차 데이터셋 평가를 PPT에 반영 (4장, 12장): 오매칭·불확실 매칭을 제외한 와인 163개를 사용. `python experiments/compare_clean_matches.py --include-blend`로 재현하고, 결과는 `outputs/clean_matches_with_blend/`에 저장
 - [x] (기존 보조 기능) `parse_list / apply_column_map`: 리스트 문자열 파싱 및 설정 기반 공통 컬럼 변환. 원본 컬럼이 없으면 경고 후 결측값으로 채움 (공통 베이스 포함)
 - [x] (추가 구현) `iqr_bounds`: 가격의 로그 스케일 IQR 범위를 계산해 이상치 보정에 활용 (전체 정제 실행 확인)
 
@@ -81,10 +81,11 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] `cross_dataset.model_quality_per_item` (교차 데이터셋 비교용 와인별 점수)
 - [x] `analysis.worst_predictions`: 실패 사례 추출 함수 구현
 - [x] 실패 사례 분석: `experiments/failure_analysis.py`로 ItemKNN·MF의 worst 20개를 사용자/와인 정보와 함께 `outputs/failure_worst_*.csv`로 저장, 실패 패턴·실제 점수별 오차·평가 수별 오차 표와 그래프 생성 (Slim 실행 확인). 결론: 큰 오차는 거의 전부 평소 후한 사용자가 인기 와인에 준 1~2점 평점
-- [ ] 실패 사례 PPT 반영: 대표 사례 표 + `failure_error_by_rating.png`
+- [x] 실패 사례 PPT 반영 (10장): 실제 평점별 MF 평균 예측 그래프, 최대 오차 20건의 실제 평점이 모두 2점 이하라는 관찰, 대표 사례 실제 1.00점 → 예측 4.58점
 - [x] 전체 5개 모델 비교표·그래프, 콜드스타트 분석 및 교차 데이터셋 결과 생성 (`outputs/`)
 - [x] (추가 평가) `experiments/cross_validate.py`로 사용자별 10-fold 교차 검증 완료. 기존 학습 데이터 안에서 기본 모델 5개와 50:50 혼합을 같은 폴드에서 비교하고, 폴드별 지표와 평균·표준편차를 `outputs/cross_validation/<profile>/`에 저장
 - [x] 발표용 내부 비교표·그래프 정리 완료. Slim 평균 NDCG@10은 기본 Hybrid 0.0440, Popularity 0.0553, 50:50 혼합 0.0716. 혼합의 추천 범위는 인기순보다 넓고 기본 Hybrid보다 좁음. 전체 6개 모델 결과는 [README](../README.md#10-fold-evaluation) 참조
+- [x] 기본 Hybrid와 50:50 혼합의 외부 Top-10 평가 완료 및 PPT 반영 (12장). Wine Enthusiast 전문가 평균 평점 상위 10개를 정답으로 비교한 결과, 기본 Hybrid NDCG@10 0.6236·Recall@10 50%, 혼합 0.0851·10%. `outputs/clean_matches_with_blend/expert_topk_metrics.csv` 및 `expert_topk_rankings.csv` 참조
 - [x] (추가 분석) 순위 실패 해석: `experiments/ranking_analysis.py` Slim 재실행 확인 (2026-11-04). 상위 50개(5%) 와인에 테스트 정답의 36.8%가 집중돼 Popularity에 유리한 평가 특성을 보여줌 (우위의 유일한 원인으로 단정 불가). 기존 추천 목록을 유지한 채 이 50개를 정답에서 제외한 tail 평가에서는 Content > Hybrid > MF, Popularity NDCG는 0. MF는 23개 와인에 추천이 집중하고 ItemKNN NDCG는 단일 Random 실행보다 낮음. `outputs/ranking_*` 생성; Random 비교의 통계적 유의성은 검증하지 않음
 - [x] (기존 베이스 기능) `PopularityRecommender`: 평점 수 중심의 비개인화 추천 기준 모델 (전체 실행 확인)
 - [x] (추가 구현) `predictions_with_errors`: 실제 평점·예측·오차·사용자/와인 학습 이력 수를 합친 상세 표 생성. `failure_analysis.py`에서 사용·실행 확인 (기본 `run.py`에는 자동 호출·저장이 없음)
@@ -113,10 +114,12 @@ git push                          # 거절되면 git pull 후 다시 push
 
 ## 5. 최종 제출물 체크리스트 (스펙 기준, 11/9 마감)
 **PPT**
-- [ ] Business objective / Data exploration / Preprocessing / Modeling / Evaluation & analysis (성공·실패 모두 설명)
-- [ ] Learning experience: 어려웠던 점과 해결, 다시 한다면, 개인별로 배운 점
-- [ ] Teamwork: 역할 분담 + **기여도 %**
-- [ ] Open-Source SW: 아키텍처 설명(README의 다이어그램 활용) + **GitHub URL**
+- [x] Project Objectives (2장): 개인화 와인 추천과 Wine Enthusiast 전문가 리뷰를 활용한 외부 평가를 두 목표로 나란히 제시
+- [x] Data exploration / Preprocessing / Modeling / Evaluation & analysis (3–5장, 7–12장): 두 데이터셋, 정제, 6개 모델, 내부 10-fold와 외부 Top-10, 개선과 실패 사례 설명
+- [x] Learning experience (13–14장): 어려웠던 점과 해결 과정, 다시 한다면 검증할 항목 정리
+- [ ] 개인별로 배운 점 (16장): 팀원별 기입 칸에 각자 내용을 추가
+- [x] Teamwork (15장): 역할 분담 및 기여도 기재 (4명 각 25%, 합계 100%)
+- [x] Open-Source SW (6장, 17장): 아키텍처 설명 및 GitHub URL 기재
 
 **소스코드 & Word**
 - [x] 주요 구현 코드에 설명 주석 작성 (전체 모델 실행 확인)
