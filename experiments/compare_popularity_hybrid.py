@@ -25,7 +25,7 @@ HYBRID_WEIGHTS = (0.0, 0.02, 0.05, 0.10, 0.20, 0.35, 0.50, 0.75, 1.0)
 VALIDATION_RATIO = 0.10
 
 
-def evaluate(items, train, holdout, weights, cfg, max_users=None):
+def evaluate(items, train, holdout, weights, cfg, max_users=None, *, components=None):
     """Fit once per split and reuse each user's scores across blend weights."""
     k = cfg["evaluation"]["k"]
     threshold = cfg["evaluation"]["relevant_threshold"]
@@ -36,9 +36,13 @@ def evaluate(items, train, holdout, weights, cfg, max_users=None):
     if not len(users):
         raise ValueError("The evaluation split has no users with a relevant held-out rating")
 
-    print(f"Training on {len(train):,} ratings and evaluating {len(users):,} users", flush=True)
-    popularity = build_model("popularity", cfg).fit(train, items)
-    hybrid = build_model("hybrid", cfg).fit(train, items)
+    if components is None:
+        print(f"Training on {len(train):,} ratings and evaluating {len(users):,} users", flush=True)
+        components = (
+            build_model("popularity", cfg).fit(train, items),
+            build_model("hybrid", cfg).fit(train, items),
+        )
+    popularity, hybrid = components
     totals = np.zeros((len(weights), 3))
     covered_items = [set() for _ in weights]
 
