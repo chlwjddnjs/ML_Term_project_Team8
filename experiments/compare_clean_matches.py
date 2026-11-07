@@ -1,11 +1,14 @@
 """Compare cross-dataset validation before/after removing reviewed bad matches.
 
-Run: python experiments/compare_clean_matches.py
+Run: python experiments/compare_clean_matches.py [--include-blend]
 Uses the same split/settings as run.py. Each model is fitted once and its
 quality scores are reused for both match policies. No scores select labels.
+With --include-blend, also export catalogue-level Top-K lists and metrics
+for Hybrid and the 50:50 blend against the experts' Top-K wines.
 Original outputs/cross_dataset.csv is preserved. Exact matches are retained;
 fuzzy-only matches require a 'same' label. Missing labels fail explicitly.
 """
+import argparse
 import json
 import shutil
 import sys
@@ -15,10 +18,12 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from experiments.compare_popularity_hybrid import PopularityHybridBlend
 from recsys.config import load_config
 from recsys.data import adapter, cleaner, loader
 from recsys.data.split import split_by_user
 from recsys.eval import cross_dataset
+from recsys.eval.metrics import ndcg_at_k, recall_at_k
 from run import build_model
 
 
@@ -43,9 +48,44 @@ def filter_matches(matches, exact, expert, labels):
     return kept, audit
 
 
+def expert_topk_comparison(model_scores, expert_scores, items, k):
+    """Rank the matched catalogue and use the experts' top wines as binary relevance."""
+    first_scores = next(iter(model_scores.values()))
+    common = first_scores.index.intersection(expert_scores.index)
+    for scores in model_scores.values():
+        common = common.intersection(scores.index)
+    if len(common) < k:
+        raise ValueError(f'Expert top-{k} evaluation requires at least {k} matched wines')
+
+    expert_top = expert_scores.loc[common].nlargest(k)
+    relevant = set(expert_top.index)
+    results, rankings = [], []
+    top_lists = {'Wine Enthusiast (reference)': expert_top}
+    for name, scores in model_scores.items():
+        top = scores.loc[common].nlargest(k)
+        recommended = top.index.tolist()
+        top_lists[name] = top
+        results.append({'model': name, 'n_candidates': len(common), 'n_expert_relevant': len(relevant),
+                        f'hits@{k}': len(relevant.intersection(recommended)),
+                        f'NDCG@{k}': ndcg_at_k(recommended, relevant, k),
+                        f'Recall@{k}': recall_at_k(recommended, relevant, k)})
+    for name, top in top_lists.items():
+        for rank, (item_id, score) in enumerate(top.items(), start=1):
+            rankings.append({'model': name, 'rank': rank, 'item_id': item_id,
+                             'score': score, 'expert_score': expert_scores.loc[item_id],
+                             'in_expert_top_k': item_id in relevant})
+    rankings = pd.DataFrame(rankings).merge(
+        items[['item_id', 'name', 'winery']], on='item_id', validate='many_to_one')
+    return pd.DataFrame(results), rankings
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--include-blend', action='store_true',
+                        help='Also evaluate the fixed 50:50 blend in a separate output directory')
+    args = parser.parse_args()
     cfg = load_config()
-    out = cfg['paths']['output_dir'] / 'clean_matches'
+    out = cfg['paths']['output_dir'] / ('clean_matches_with_blend' if args.include_blend else 'clean_matches')
     out.mkdir(parents=True, exist_ok=True)
     original = cfg['paths']['output_dir'] / 'cross_dataset.csv'
     if original.exists() and not (out / 'previous_cross_dataset.csv').exists():
@@ -75,10 +115,25 @@ def main():
     expert_after = cross_dataset.expert_score_per_item(after, expert)
     common = expert_before.index.intersection(expert_after.index)
     quality = {'X-Wines mean rating (reference)':train.groupby('item_id').rating.mean()}
-    for name in cfg['models']:
+    model_names = list(cfg['models'])
+    if args.include_blend:
+        model_names = list(dict.fromkeys([*model_names, 'popularity', 'hybrid']))
+    components = {}
+    for name in model_names:
         print('Training once:', name, flush=True)
         model = build_model(name, cfg).fit(train, items)
         quality[model.name] = cross_dataset.model_quality_per_item(model, train, items.item_id)
+        if args.include_blend and name in ('popularity', 'hybrid'):
+            components[name] = model
+    if args.include_blend:
+        blend = PopularityHybridBlend(components['popularity'], components['hybrid'])
+        quality[blend.name] = cross_dataset.model_quality_per_item(blend, train, items.item_id)
+        expert_metrics, expert_lists = expert_topk_comparison(
+            {name: quality[name] for name in (components['hybrid'].name, blend.name)},
+            expert_after, items, cfg['evaluation']['k'])
+        expert_metrics.to_csv(out / 'expert_topk_metrics.csv', index=False)
+        expert_lists.to_csv(out / 'expert_topk_rankings.csv', index=False, encoding='utf-8-sig')
+        print(expert_metrics.to_string(index=False), flush=True)
     rows = []
     for cohort in ['policy_items', 'common_items']:
         for policy, scores in [('before', expert_before),('after',expert_after)]:
@@ -96,6 +151,7 @@ def main():
         delta[(metric,'delta_after_minus_before')] = delta[(metric,'after')] - delta[(metric,'before')]
     delta.to_csv(out / 'deltas.csv')
     settings = {'config':{k:v for k,v in cfg.items() if k!='paths'},
+                'include_blend':args.include_blend,
                 'threshold':.85,'labels':str(label_path),'removed':audit.decision.value_counts().to_dict(),
                 'limitations':'Exact matches assumed correct; same labels are team judgements. No tuning from expert correlations.'}
     (out/'settings.json').write_text(json.dumps(settings,indent=2,ensure_ascii=False),encoding='utf-8')

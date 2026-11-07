@@ -25,6 +25,26 @@ HYBRID_WEIGHTS = (0.0, 0.02, 0.05, 0.10, 0.20, 0.35, 0.50, 0.75, 1.0)
 VALIDATION_RATIO = 0.10
 
 
+def normalized_component_scores(popularity, hybrid, user_id, item_ids):
+    """Scale each model's scores over the same set of wines."""
+    return minmax(popularity.score(user_id, item_ids)), minmax(hybrid.score(user_id, item_ids))
+
+
+class PopularityHybridBlend:
+    """Fixed 50:50 score blend of two fitted recommenders."""
+
+    name = "Popularity + Hybrid (50:50)"
+
+    def __init__(self, popularity, hybrid):
+        self.popularity = popularity
+        self.hybrid = hybrid
+
+    def score(self, user_id, item_ids):
+        popularity, hybrid = normalized_component_scores(
+            self.popularity, self.hybrid, user_id, item_ids)
+        return 0.5 * popularity + 0.5 * hybrid
+
+
 def evaluate(items, train, holdout, weights, cfg, max_users=None, *, components=None):
     """Fit once per split and reuse each user's scores across blend weights."""
     k = cfg["evaluation"]["k"]
@@ -51,8 +71,7 @@ def evaluate(items, train, holdout, weights, cfg, max_users=None, *, components=
         candidates = np.array([item for item in hybrid.item_ids if item not in seen])
         if not candidates.size:
             continue
-        pop_scores = minmax(popularity.score(user, candidates))
-        hybrid_scores = minmax(hybrid.score(user, candidates))
+        pop_scores, hybrid_scores = normalized_component_scores(popularity, hybrid, user, candidates)
         for index, weight in enumerate(weights):
             scores = (1 - weight) * pop_scores + weight * hybrid_scores
             order = np.argsort(-scores, kind="stable")[:k]
