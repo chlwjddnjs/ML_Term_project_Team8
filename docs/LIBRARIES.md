@@ -115,3 +115,6 @@ Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` sh
 | `numpy` | `Generator.choice(a, size, replace)` | `size=k`, `replace=False` | Random top-k recommendation used as the lower bound for the ranking metrics (`ranking_analysis.py`). |
 | `pandas` | `Series.isin(values)` | `values`: set of the 50 most-rated wines | Share of recommendations / hits / relevant test ratings that fall on the popular head (`ranking_analysis.py`). |
 | `matplotlib` | `Axes.bar(x, height, width, label)`, `Axes.set_xticks(ticks, labels)` | `width=0.4`, bars shifted by ±0.2 | Side-by-side bars of overall vs long-tail NDCG per model (`ranking_analysis.py`). |
+| `pandas` | `DataFrame.groupby(by).indices` | `by="user_id"` | Gets the row positions for each user before assigning ratings to validation folds (`cross_validate.py`). |
+| `numpy` | `Generator.permutation(x)` | `x`: one user's rating row positions | Shuffles the positions reproducibly before distributing them across folds (`cross_validate.py`). |
+| `pandas` | `DataFrameGroupBy.agg(func)` | `func=["mean", "std", "count"]` | Reports the average, sample standard deviation, and number of available fold scores for each model (`cross_validate.py`). |

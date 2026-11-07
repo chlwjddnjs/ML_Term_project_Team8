@@ -10,6 +10,7 @@ python run.py --data sample     # 샘플 데이터로 전체 파이프라인 확
 - 데이터 파일 3개는 git에 올라가지 않으니 각자 받아서 `data/raw/`에 넣기 (`data/raw/README.md` 참고).
 - 모든 명령어는 `run.py`가 있는 폴더에서 실행.
 - 2026-11-03 기준 전체 데이터에서 5개 모델 모두 `[ok]`, 교차 데이터셋 검증 및 결과 저장까지 확인했습니다.
+- 발표의 내부 모델 비교는 `python experiments/cross_validate.py --data slim`으로 재현합니다. Sample은 `--data sample`로 확인할 수 있습니다.
 - 아래 체크는 구현/실행 확인과 실험 해석/제출물 작성을 구분합니다. 미체크는 미완료이거나 결과를 아직 확인하지 못한 항목입니다.
 - 처음엔 `--data sample`(와인 100개)로 개발하고, 동작하면 `data/raw/`에 Slim을 넣고 `python run.py`.
 
@@ -30,11 +31,13 @@ git push                          # 거절되면 git pull 후 다시 push
    - RATINGS: `user_id, item_id, rating(1~5), date`
 3. **모델은 `_fit`과 `score` 두 개만 구현.** `recommend`, `predict`는 `base.py`가 알아서 처리.
 4. **하이퍼파라미터는 코드에 박지 말고 `config.yaml`에.**
-5. **split은 `split_by_user` + config의 seed만 사용.** 각자 따로 나누면 결과 비교 불가.
+5. **같은 비교표의 모델은 동일한 분할과 config의 seed를 사용.** 기본 실험은 `split_by_user`로 나누고, 10-fold 비교는 이 분할의 학습 부분을 `experiments/cross_validate.py`에서 다시 나눔.
 6. 인터넷 코드를 참고했으면 바로 `docs/CITATIONS.md`에 출처 추가 (안 하면 표절 처리).
 7. 수업에서 안 배운 함수/클래스를 쓰면 바로 `docs/LIBRARIES.md` 자기 칸에 파라미터와 함께 설명 추가 (스펙 필수 항목).
 
 ## 3. 역할별 할 일
+
+추가 실험은 팀의 담당 영역에 따라 분류합니다. 실제 변경 작성자는 Git 커밋 기록에서 확인할 수 있습니다.
 
 ### ① 김도원 — 데이터 · DatasetAdapter (`data/adapter.py`, `data/cleaner.py`)
 - [x] EDA 자료 생성: `cleaner.quality_report` 출력 + `outputs/eda_rating_distribution.png` 생성 확인
@@ -67,6 +70,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] `ContentBasedRecommender._fit / score / similar_items`
 - [x] `HybridRecommender.user_weight`: 평점 적은 사용자일수록 콘텐츠 비중↑ (가중치 검증 및 MF 연동 전체 실행·교차 데이터셋 평가 완료)
 - [x] (추가 분석) 고정 vs 사용자별 가중치 통제 비교 완료: 기본 2,000명 및 전체 평가 가능 8,904명 비교. 전체 차이는 미미하고, 평점 5개 미만 79명에서 NDCG 소폭 상승·Recall 하락으로 효과가 혼재함. `docs/HYBRID_WEIGHT_EXPERIMENT.md` 참조 (단일 분할 결과, 우월성 확정 불가)
+- [x] (추가 실험) Popularity + Hybrid 50:50 혼합 구현·평가 완료. `experiments/compare_popularity_hybrid.py`에서 사용자별 추천 후보의 두 점수를 각각 정규화해 절반씩 합산. 기존 검증에서 고른 비율을 고정해 Slim 10-fold 평균 NDCG@10 0.0716, Recall@10 14.03%, Coverage 6.79% 확인
 - [ ] (선택) 와인 임베딩 K-means + PCA/t-SNE 시각화: 미구현, 필수 작업 아님
 - [x] (추가 구현) `ItemFeatureEncoder`: 학습한 속성 사전을 보관하고 새 와인도 같은 특징 공간으로 변환. 미등록 속성은 무시하고 결측 속성은 0으로 처리 (기능 검증 완료)
 - [x] (선택 기능 구현) `use_text=True`일 때 설명 텍스트의 TF-IDF 특징 결합. 작은 예제로 검증했으나 기본 설정은 `false`이고 X-Wines 공통 스키마에는 설명 텍스트가 없어 최종 실험에는 사용하지 않음
@@ -79,7 +83,8 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] 실패 사례 분석: `experiments/failure_analysis.py`로 ItemKNN·MF의 worst 20개를 사용자/와인 정보와 함께 `outputs/failure_worst_*.csv`로 저장, 실패 패턴·실제 점수별 오차·평가 수별 오차 표와 그래프 생성 (Slim 실행 확인). 결론: 큰 오차는 거의 전부 평소 후한 사용자가 인기 와인에 준 1~2점 평점
 - [ ] 실패 사례 PPT 반영: 대표 사례 표 + `failure_error_by_rating.png`
 - [x] 전체 5개 모델 비교표·그래프, 콜드스타트 분석 및 교차 데이터셋 결과 생성 (`outputs/`)
-- [ ] 최종 비교표·그래프 정리: 추가 실험 후 최종 결과를 확정하고 발표용 표·그림 선정 및 해석 필요. 현재 Hybrid는 MF·Content보다 NDCG가 높지만 Popularity보다 낮음
+- [x] (추가 평가) `experiments/cross_validate.py`로 사용자별 10-fold 교차 검증 완료. 기존 학습 데이터 안에서 기본 모델 5개와 50:50 혼합을 같은 폴드에서 비교하고, 폴드별 지표와 평균·표준편차를 `outputs/cross_validation/<profile>/`에 저장
+- [x] 발표용 내부 비교표·그래프 정리 완료. Slim 평균 NDCG@10은 기본 Hybrid 0.0440, Popularity 0.0553, 50:50 혼합 0.0716. 혼합의 추천 범위는 인기순보다 넓고 기본 Hybrid보다 좁음. 전체 6개 모델 결과는 [README](../README.md#10-fold-evaluation) 참조
 - [x] (추가 분석) 순위 실패 해석: `experiments/ranking_analysis.py` Slim 재실행 확인 (2026-11-04). 상위 50개(5%) 와인에 테스트 정답의 36.8%가 집중돼 Popularity에 유리한 평가 특성을 보여줌 (우위의 유일한 원인으로 단정 불가). 기존 추천 목록을 유지한 채 이 50개를 정답에서 제외한 tail 평가에서는 Content > Hybrid > MF, Popularity NDCG는 0. MF는 23개 와인에 추천이 집중하고 ItemKNN NDCG는 단일 Random 실행보다 낮음. `outputs/ranking_*` 생성; Random 비교의 통계적 유의성은 검증하지 않음
 - [x] (기존 베이스 기능) `PopularityRecommender`: 평점 수 중심의 비개인화 추천 기준 모델 (전체 실행 확인)
 - [x] (추가 구현) `predictions_with_errors`: 실제 평점·예측·오차·사용자/와인 학습 이력 수를 합친 상세 표 생성. `failure_analysis.py`에서 사용·실행 확인 (기본 `run.py`에는 자동 호출·저장이 없음)
@@ -89,7 +94,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] (평가 기능) `cold_start_analysis`: 사용자 학습 평점 수별 순위 지표와 사용자 수 집계 (`outputs/cold_start_analysis.csv` 생성 확인)
 
 ### 공통 베이스 기능 — 공동 관리 (개별 신규 기여와 구분)
-- [x] `loader`: CSV 로딩, X-Wines 파일명 차이 자동 탐색, 전문가 파일 부재 시 교차 검증 생략
+- [x] `loader`: CSV 로딩, X-Wines 파일명 차이 자동 탐색, 전문가 파일 부재 시 교차 데이터셋 평가 생략
 - [x] `config.py / run.py`: YAML 경로·파라미터 로딩, `--data / --models / --config` 명령행 옵션
 - [x] `split_by_user`: 사용자별 학습/테스트 분리, seed 고정, 테스트 사용자에게 최소 1개 학습 평점 유지 (전체 실행 확인)
 - [x] `Recommender`: 모델 공통 인터페이스, 사용자·아이템 인덱스, 이미 평가한 와인 제외, Top-K 추천, 평점 모델의 예측값 1~5 제한
