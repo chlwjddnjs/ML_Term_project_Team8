@@ -117,7 +117,7 @@ git push                          # 거절되면 git pull 후 다시 push
 - [x] Project Objectives (2장): 개인화 와인 추천과 Wine Enthusiast 전문가 리뷰를 활용한 외부 평가를 두 목표로 나란히 제시
 - [x] Data exploration / Preprocessing / Modeling / Evaluation & analysis (3–5장, 7–12장): 두 데이터셋, 정제, 6개 모델, 내부 10-fold와 외부 Top-10, 개선과 실패 사례 설명
 - [x] Learning experience (13–14장): 어려웠던 점과 해결 과정, 다시 한다면 검증할 항목 정리
-- [x] 개인별로 배운 점 (16장): 최정원이 팀원별 내용을 최종 PPT에 직접 입력
+- [x] 개인별로 배운 점 (16장)
 - [x] Teamwork (15장): 역할 분담 및 기여도 기재 (4명 각 25%, 합계 100%)
 - [x] Open-Source SW (6장, 17장): 아키텍처 설명 및 GitHub URL 기재
 
