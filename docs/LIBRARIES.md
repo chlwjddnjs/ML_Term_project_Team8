@@ -85,6 +85,8 @@ Delete rows that were actually covered in class.
 | `sklearn.feature_extraction.text` | `TfidfVectorizer(max_features, sublinear_tf)` | `max_features=5000`, `sublinear_tf=True` | Optional description features; skipped when descriptions are unavailable. |
 | `pandas` | `to_numeric(arg, errors)` | `errors="coerce"` | Converts ABV to numbers; invalid/missing ABV contributes zero. |
 | `numpy` | `linalg.norm`, `allclose` | `allclose(weights, 0)` | Normalizes user profiles; detects equal ratings and uses equal weights instead. |
+| Project code | `minmax(x)` | `x`: one model's scores over the same candidate wines | Scales scores to 0–1 and returns zeros for a constant score vector. The 50:50 experiment averages the scaled Popularity and Hybrid scores. |
+| Project code | `PopularityHybridBlend(popularity, hybrid).score(user_id, item_ids)` | Two fitted models, a training user ID, and candidate wine IDs | Produces the fixed 50:50 scores used to rank wines in external evaluation. |
 
 Implementation notes: Each categorical/list block is L2-normalized, then concatenated with ABV / 25 and the complete wine vector is normalized again. Profiles use signed `(rating - user mean)` weights from training ratings only. With a single/equal rating history, rated wine vectors have equal weights. Unknown users/items return zero similarity. `model.feature_encoder` retains fitted vocabularies for later datasets. Content scores are similarities, so evaluate ranking metrics rather than RMSE/MAE.
 
@@ -118,3 +120,11 @@ Experiment helper (`experiments/compare_hybrid_weights.py`): `copy.copy(obj)` sh
 | `pandas` | `DataFrame.groupby(by).indices` | `by="user_id"` | Gets the row positions for each user before assigning ratings to validation folds (`cross_validate.py`). |
 | `numpy` | `Generator.permutation(x)` | `x`: one user's rating row positions | Shuffles the positions reproducibly before distributing them across folds (`cross_validate.py`). |
 | `pandas` | `DataFrameGroupBy.agg(func)` | `func=["mean", "std", "count"]` | Reports the average, sample standard deviation, and number of available fold scores for each model (`cross_validate.py`). |
+| `argparse` | `ArgumentParser.add_argument(name, action)` | `name="--include-blend"`, `action="store_true"` | Enables external evaluation of the 50:50 blend and writes results to a separate directory. |
+| `pandas` | `DataFrame.merge(..., validate)` | `validate="one_to_one"` for match pairs and `"many_to_one"` for review labels and wine metadata | Checks that joins do not introduce duplicate match rows when applying labels or attaching wine names. |
+| `pandas` | `Index.intersection(other)`, `Series.nlargest(n)` | `other`: IDs in another score series, `n=10` by default | Restricts evaluation to the shared catalogue and selects the model and expert Top-10 lists. |
+| `shutil` | `copy2(src, dst)` | `src`: existing cross-dataset CSV, `dst`: backup path | Copies the original result into the experiment folder on the first run when an original is available. |
+| `json`, `pathlib` | `json.dumps(obj, indent, ensure_ascii)`, `Path.write_text(data, encoding)` | `indent=2`, `ensure_ascii=False`, `encoding="utf-8"` | Saves the external evaluation settings and match-review policy with readable Unicode. |
+| Project code | `assign_folds(ratings, min_user_ratings, seed)` | Cleaned training ratings, profile minimum rating count, fixed random seed | Distributes eligible users' ratings across ten folds and keeps sparse histories in training. |
+| Project code | `expert_topk_comparison(model_scores, expert_scores, items, k)` | Wine-indexed score series, item metadata, `k=10` | Treats the expert Top-10 as the relevant set and reports model lists, NDCG and recall for the matched catalogue. |
+| Project code | `precision_at_k(recommended, relevant, k)`, `recall_at_k(...)`, `ndcg_at_k(...)` | Ordered wine IDs, relevant wine IDs, cutoff `k=10` | Measures the share of relevant recommendations, the share of relevant wines retrieved, and how early relevant wines appear. |
